@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SecureScan Terminal — Styled with CMD</title>
+
+<!-- Playfair Display: elegant serif / italic -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400;1,700&display=swap" rel="stylesheet">
+
+<style>
+:root{--neon:#00ff66;--accent:#00ffd5;--danger:#ff4d4d;}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#000;color:var(--neon);overflow:hidden}
+
+/* 전체 폰트: Playfair Display (세리프 이탤릭 느낌) */
+body{
+  font-family: 'Playfair Display', Georgia, "Times New Roman", serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* 매트릭스 캔버스 (항상 뒤) */
+canvas#matrix{position:fixed;inset:0;z-index:0;display:block}
+
+/* 인트로 */
+#intro{
+  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:40;background:linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6));
+}
+#intro h1{
+  font-size:1.5rem;
+  letter-spacing:2px;
+  line-height:1;
+  margin:0;
+  color:var(--accent);
+  font-style:italic;
+  font-weight:700;
+  text-shadow:0 0 12px rgba(0,255,213,0.18), 0 0 30px rgba(0,255,102,0.06);
+  transform: translateY(-6px);
+  white-space:nowrap;
+}
+#loadingText{
+  margin-top:14px;
+  font-size:1.05rem;
+  font-family: monospace;
+  text-shadow:0 0 8px var(--neon);
+  color:var(--neon);
+}
+
+/* 로그인 패널 */
+#loginPanel{
+  display:none;
+  position:fixed;
+  left:50%; top:50%; transform:translate(-50%,-50%);
+  width:360px; padding:26px; border-radius:8px;
+  background:rgba(0,0,0,0.88);
+  border:1px solid rgba(0,255,150,0.28);
+  box-shadow:0 0 40px rgba(0,255,150,0.12);
+  z-index:50;
+  text-align:center;
+}
+#loginPanel h2{
+  margin:0 0 12px 0;
+  font-size:1.25rem;
+  color:var(--accent);
+  font-style:italic;
+  text-shadow:0 0 6px var(--accent);
+}
+#loginPanel input{
+  width:85%;padding:10px;margin:10px 0;border:1px solid rgba(0,255,150,0.12);
+  background:transparent;color:var(--neon);outline:none;border-radius:4px;text-align:center;
+  font-family: 'Playfair Display', serif;
+}
+#loginPanel button{
+  width:88%;padding:10px;margin-top:8px;border-radius:6px;border:none;background:var(--neon);color:#000;font-weight:bold;cursor:pointer;
+  font-family: monospace;
+}
+#loginPanel button:hover{background:var(--accent);box-shadow:0 0 12px var(--accent)}
+#accessMsg{height:20px;margin-top:8px;font-size:0.95rem}
+
+/* 대시보드 */
+#dashboard{
+  display:none; 
+  position:fixed;
+  inset:0;
+  z-index:30;
+  background:rgba(0,0,0,0.9);
+  padding:30px;
+  color:var(--neon);
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+#dashboard h2{
+  font-size:1.6rem;color:var(--accent);margin-bottom:12px;
+  font-style:italic;
+}
+.controls{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+button.ctrl{
+  width:160px;padding:10px;border-radius:6px;border:none;background:var(--neon);color:#000;font-weight:bold;cursor:pointer;
+  font-family:monospace;
+}
+button.ctrl:hover{background:var(--accent)}
+#scanArea{
+  width:90%;max-width:900px;height:300px;border-radius:6px;border:1px solid rgba(0,255,150,0.14);
+  padding:10px;background:rgba(0,0,0,0.18);overflow:auto;
+  font-family:monospace;
+  color:var(--neon);
+  margin-bottom:12px;
+}
+
+/* CMD 패널 */
+#cmdPanel{
+  width:90%;max-width:900px;height:320px;border-radius:6px;border:1px solid rgba(0,255,150,0.16);
+  background:rgba(0,0,0,0.26); padding:10px; font-family:monospace; color:var(--neon); overflow:hidden;
+  display:flex;flex-direction:column;
+}
+#cmdOutput{
+  flex:1; overflow:auto; padding:8px; border-radius:4px; background:rgba(0,0,0,0.12);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+}
+.cmd-line{display:flex;gap:8px;align-items:center;margin-top:8px}
+#cmdInput{
+  flex:1;padding:8px;border-radius:4px;border:1px solid rgba(0,255,150,0.10);background:transparent;color:var(--neon);
+  outline:none;font-family:monospace;
+}
+.cmd-btn{padding:8px 10px;border-radius:6px;border:none;background:var(--neon);color:#000;cursor:pointer;font-family:monospace}
+.cmd-btn:hover{background:var(--accent)}
+
+/* 반응형 */
+@media(max-width:720px){
+  #intro h1{font-size:1.2rem;letter-spacing:1.5px}
+  #cmdPanel{height:260px}
+}
+@media(max-width:420px){
+  #loginPanel{width:92%}
+  button.ctrl{width:120px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<!-- 인트로 -->
+<div id="intro" aria-hidden="false">
+  <h1>𝑊𝐸𝐿𝐶𝑂𝑀  𝑈𝑆𝐸𝑅</h1>
+  <div id="loadingText">[       ]</div>
+</div>
+
+<!-- 로그인 -->
+<div id="loginPanel" aria-hidden="true">
+  <h2>TERMINAL LOGIN</h2>
+  <input id="username" type="text" placeholder="ID" autocomplete="off" />
+  <input id="password" type="password" placeholder="PASSWORD" autocomplete="off" />
+  <br>
+  <button id="enterBtn" onclick="checkLogin()">ENTER</button>
+  <div id="accessMsg" role="status" aria-live="polite"></div>
+</div>
+
+<!-- 대시보드 -->
+<div id="dashboard" aria-hidden="true" style="display:none;">
+  <h2>SECURESCAN DASHBOARD</h2>
+  <div class="controls">
+    <button class="ctrl" onclick="startScan()">Start Scan</button>
+    <button class="ctrl" onclick="updateDefs()">Update Definitions</button>
+    <button class="ctrl" onclick="toggleCmd()">Open CMD</button>
+  </div>
+
+  <div id="scanArea" aria-live="polite"></div>
+
+  <!-- CMD 패널 (초기 숨김) -->
+  <div id="cmdPanel" style="display:none;">
+    <div id="cmdOutput" aria-live="polite"></div>
+
+    <div class="cmd-line">
+      <div style="color:var(--accent);min-width:90px">C:\User\You&gt;</div>
+      <input id="cmdInput" placeholder="Type command (ex: myip, help, clear, echo hello)" />
+      <button class="cmd-btn" onclick="runCmd()">Run</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- 매트릭스 배경 ---------- */
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const cols = Math.floor(window.innerWidth / 16);
+let drops = new Array(cols).fill(0);
+const letters = 'abcdefghijklmnopqrstuvwxyz0123456789ﾊﾐﾋﾌﾍﾎﾅﾆﾇﾈﾉｦｧｨｩｪｫｬｭｮｯ';
+function draw(){
+  ctx.fillStyle = 'rgba(0,0,0,0.06)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#00ff66';
+  ctx.font = '14px monospace';
+  for(let i=0;i<drops.length;i++){
+    const text = letters.charAt(Math.floor(Math.random()*letters.length));
+    const x = i * 16;
+    const y = drops[i] * 16;
+    ctx.fillText(text, x, y);
+    if(y > canvas.height && Math.random() > 0.975) drops[i]=0;
+    drops[i]++;
+  }
+}
+let matrixInterval = setInterval(draw, 40);
+
+/* ---------- 로딩 (인트로 → 로그인) ---------- */
+const loadingText = document.getElementById('loadingText');
+const intro = document.getElementById('intro');
+const loginPanel = document.getElementById('loginPanel');
+const dashboard = document.getElementById('dashboard');
+
+let progress = 0;
+const maxProgress = 7;
+
+const loadInterval = setInterval(()=>{
+  progress++;
+  loadingText.textContent = '[' + '#'.repeat(progress) + ' '.repeat(maxProgress - progress) + ']';
+  if(progress >= maxProgress){
+    clearInterval(loadInterval);
+    intro.style.display = 'none';
+    loginPanel.style.display = 'block';
+    loginPanel.setAttribute('aria-hidden','false');
+    dashboard.style.display = 'none';
+    dashboard.setAttribute('aria-hidden','true');
+    document.getElementById('username').focus();
+  }
+}, 300);
+
+/* ---------- 로그인 제어 ---------- */
+function showDashboard(){
+  loginPanel.style.display = 'none';
+  loginPanel.setAttribute('aria-hidden','true');
+  dashboard.style.display = 'flex';
+  dashboard.setAttribute('aria-hidden','false');
+}
+
+function checkLogin(){
+  const user = (document.getElementById('username').value || '').trim();
+  const pass = (document.getElementById('password').value || '').trim();
+  const msg = document.getElementById('accessMsg');
+
+  const validUser = 'admin';
+  const validPass = 'cyberpunk';
+
+  if(user === validUser && pass === validPass){
+    msg.textContent = 'ACCESS GRANTED';
+    msg.style.color = '#00ff66';
+    setTimeout(showDashboard, 700);
+  } else {
+    msg.textContent = 'ACCESS DENIED';
+    msg.style.color = '#ff4d4d';
+    setTimeout(()=> { msg.textContent = ''; }, 1000);
+  }
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' && loginPanel.style.display === 'block'){
+    checkLogin();
+  }
+  // cmd input 엔터도 처리
+  if(e.key === 'Enter' && document.getElementById('cmdPanel').style.display === 'block'){
+    // 포커스가 cmdInput에 있을 때만 실행
+    if(document.activeElement === document.getElementById('cmdInput')){
+      runCmd();
+    }
+  }
+});
+
+/* ---------- CMD 기능 (브라우저에서 안전한 범위로) ---------- */
+const cmdOutput = document.getElementById('cmdOutput');
+const cmdInput = document.getElementById('cmdInput');
+const cmdPanel = document.getElementById('cmdPanel');
+
+function toggleCmd(){
+  if(cmdPanel.style.display === 'none' || cmdPanel.style.display === ''){
+    cmdPanel.style.display = 'flex';
+    // 자동 스크롤 맨 아래
+    setTimeout(()=>{ cmdOutput.scrollTop = cmdOutput.scrollHeight; }, 10);
+    cmdInput.focus();
+    writeLine('Welcome to SecureScan CMD. Type "help" for commands.');
+  } else {
+    cmdPanel.style.display = 'none';
+  }
+}
+
+function writeLine(text, klass){
+  const d = document.createElement('div');
+  if(klass) d.className = klass;
+  d.textContent = text;
+  cmdOutput.appendChild(d);
+  cmdOutput.scrollTop = cmdOutput.scrollHeight;
+}
+
+/* 안전한 명령 처리: myip, help, clear, echo */
+async function runCmd(){
+  const raw = (cmdInput.value || '').trim();
+  if(!raw) return;
+  writeLine('C:\\User\\You> ' + raw, 'cmd-in');
+  cmdInput.value = '';
+
+  const parts = raw.split(' ').filter(Boolean);
+  const cmd = parts[0].toLowerCase();
+
+  if(cmd === 'help'){
+    writeLine('Available commands: myip, help, clear, echo <text>, date');
+    return;
+  }
+  if(cmd === 'clear'){
+    cmdOutput.innerHTML = '';
+    return;
+  }
+  if(cmd === 'echo'){
+    const rest = parts.slice(1).join(' ');
+    writeLine(rest);
+    return;
+  }
+  if(cmd === 'date'){
+    writeLine(new Date().toString());
+    return;
+  }
+  if(cmd === 'myip'){
+    writeLine('Fetching public IP...');
+    try{
+      // 공인 IP 가져오기 (CORS 허용되는 공개 API)
+      const res = await fetch('https://api.ipify.org?format=json');
+      if(!res.ok) throw new Error('Network response was not ok');
+      const data = await res.json();
+      writeLine('Public IP: ' + (data.ip || 'Unknown'));
+    }catch(err){
+      writeLine('Unable to retrieve IP — check your connection or try another service.');
+      console.error(err);
+    }
+    return;
+  }
+
+  // 알려지지 않은 명령 시 시뮬레이션 응답
+  writeLine(`'${cmd}' is not recognized as an internal or external command.`);
+}
+
+/* ---------- 대시보드 기능 (기존 스캔 시뮬레이션) ---------- */
+function startScan(){
+  const area = document.getElementById('scanArea');
+  area.innerHTML = '';
+  const items = [
+    'C:\\Windows\\System32',
+    'C:\\Users\\Default',
+    'C:\\Program Files',
+    'C:\\Windows\\Temp',
+    'C:\\Users\\You\\Downloads',
+    'C:\\Users\\You\\AppData\\Roaming',
+    'C:\\Registry'
+  ];
+  let i = 0;
+  const interval = setInterval(()=>{
+    if(i < items.length){
+      const div = document.createElement('div');
+      div.textContent = 'Scanning ' + items[i] + ' ... OK';
+      area.appendChild(div);
+      area.scrollTop = area.scrollHeight;
+      i++;
+    } else {
+      clearInterval(interval);
+      const final = document.createElement('div');
+      final.textContent = 'Scan Complete: No Threats Found';
+      final.style.color = '#00ff66';
+      final.style.marginTop = '8px';
+      area.appendChild(final);
+      area.scrollTop = area.scrollHeight;
+    }
+  }, 600);
+}
+
+function updateDefs(){
+  const area = document.getElementById('scanArea');
+  const d = document.createElement('div');
+  d.textContent = 'Updating virus definitions...';
+  area.appendChild(d);
+  area.scrollTop = area.scrollHeight;
+  setTimeout(()=>{
+    const d2 = document.createElement('div');
+    d2.textContent = 'Update Complete: Definitions up to date';
+    d2.style.color = '#00ff66';
+    area.appendChild(d2);
+    area.scrollTop = area.scrollHeight;
+  }, 1700);
+}
+</script>
+</body>
+</html>
+
