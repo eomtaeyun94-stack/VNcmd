@@ -3,87 +3,36 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>SecureScan Terminal — Styled with CMD</title>
-
+<title>SecureScan Terminal — Enhanced CMD</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400;1,700&display=swap" rel="stylesheet">
-
 <style>
 :root{--neon:#00ff66;--accent:#00ffd5;--danger:#ff4d4d;}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:#000;color:var(--neon);overflow:hidden}
-body{
-  font-family:'Playfair Display',Georgia,"Times New Roman",serif;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
+body{font-family:'Playfair Display',Georgia,"Times New Roman",serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 canvas#matrix{position:fixed;inset:0;z-index:0;display:block}
-
-/* 인트로 */
-#intro{
-  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:40;background:linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6));
-}
-#intro h1{
-  font-size:1.5rem;letter-spacing:2px;line-height:1;margin:0;color:var(--accent);
-  font-style:italic;font-weight:700;text-shadow:0 0 12px rgba(0,255,213,0.18), 0 0 30px rgba(0,255,102,0.06);
-  transform:translateY(-6px);white-space:nowrap;
-}
-#loadingText{
-  margin-top:14px;font-size:1.05rem;font-family:monospace;
-  text-shadow:0 0 8px var(--neon);color:var(--neon);
-}
-
-/* 로그인 패널 */
-#loginPanel{
-  display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:360px;padding:26px;border-radius:8px;background:rgba(0,0,0,0.88);
-  border:1px solid rgba(0,255,150,0.28);box-shadow:0 0 40px rgba(0,255,150,0.12);
-  z-index:50;text-align:center;
-}
-#loginPanel h2{
-  margin:0 0 12px;font-size:1.25rem;color:var(--accent);font-style:italic;text-shadow:0 0 6px var(--accent);
-}
-#loginPanel input{
-  width:85%;padding:10px;margin:10px 0;border:1px solid rgba(0,255,150,0.12);
-  background:transparent;color:var(--neon);outline:none;border-radius:4px;text-align:center;
-  font-family:'Playfair Display',serif;
-}
-#loginPanel button{
-  width:88%;padding:10px;margin-top:8px;border-radius:6px;border:none;background:var(--neon);
-  color:#000;font-weight:bold;cursor:pointer;font-family:monospace;
-}
-#loginPanel button:hover{background:var(--accent);box-shadow:0 0 12px var(--accent)}
-#accessMsg{height:20px;margin-top:8px;font-size:0.95rem}
-
-/* 대시보드 */
-#dashboard{
-  display:none;position:fixed;inset:0;z-index:30;background:rgba(0,0,0,0.9);
-  padding:30px;color:var(--neon);overflow:auto;display:flex;flex-direction:column;align-items:center;
-}
-#dashboard h2{
-  font-size:1.6rem;color:var(--accent);margin-bottom:12px;font-style:italic;
-}
-
-/* CMD 패널 */
-#cmdPanel{
-  width:90%;max-width:900px;height:320px;border-radius:6px;border:1px solid rgba(0,255,150,0.16);
-  background:rgba(0,0,0,0.26);padding:10px;font-family:monospace;color:var(--neon);
-  overflow:hidden;display:flex;flex-direction:column;
-}
-#cmdOutput{
-  flex:1;overflow:auto;padding:8px;border-radius:4px;background:rgba(0,0,0,0.12);
-  box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
-}
+.panel{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:360px;padding:26px;border-radius:8px;background:rgba(0,0,0,0.88);border:1px solid rgba(0,255,150,0.28);box-shadow:0 0 40px rgba(0,255,150,0.12);z-index:50;text-align:center;}
+.panel h2{margin:0 0 12px;font-size:1.25rem;color:var(--accent);font-style:italic;text-shadow:0 0 6px var(--accent)}
+.panel input{width:85%;padding:10px;margin:10px 0;border:1px solid rgba(0,255,150,0.12);background:transparent;color:var(--neon);outline:none;border-radius:4px;text-align:center;font-family:'Playfair Display',serif;}
+.panel button{width:88%;padding:10px;margin-top:8px;border-radius:6px;border:none;background:var(--neon);color:#000;font-weight:bold;cursor:pointer;font-family:monospace;}
+.panel button:hover{background:var(--accent);box-shadow:0 0 12px var(--accent)}
+#accessMsg,#signupMsg{height:20px;margin-top:8px;font-size:0.95rem}
+#intro{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:40;background:linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6));}
+#intro h1{font-size:1.5rem;letter-spacing:2px;color:var(--accent);font-style:italic;font-weight:700;text-shadow:0 0 12px rgba(0,255,213,0.18),0 0 30px rgba(0,255,102,0.06)}
+#loadingText{margin-top:14px;font-size:1.05rem;font-family:monospace;text-shadow:0 0 8px var(--neon);color:var(--neon)}
+#dashboard{display:none;position:fixed;inset:0;z-index:30;background:rgba(0,0,0,0.9);padding:30px;color:var(--neon);overflow:auto;display:flex;flex-direction:column;align-items:center;}
+#dashboard h2{font-size:1.6rem;color:var(--accent);margin-bottom:12px;font-style:italic;}
+#cmdPanel{width:90%;max-width:980px;height:420px;border-radius:6px;border:1px solid rgba(0,255,150,0.16);background:rgba(0,0,0,0.26);padding:10px;font-family:monospace;color:var(--neon);overflow:hidden;display:flex;flex-direction:column;}
+#cmdOutput{flex:1;overflow:auto;padding:10px;border-radius:4px;background:rgba(0,0,0,0.12);box-shadow:inset 0 0 20px rgba(0,0,0,0.2);font-family:monospace;white-space:pre-wrap;}
 .cmd-line{display:flex;gap:8px;align-items:center;margin-top:8px}
-#cmdInput{
-  flex:1;padding:8px;border-radius:4px;border:1px solid rgba(0,255,150,0.10);
-  background:transparent;color:var(--neon);outline:none;font-family:monospace;
-}
+#cmdInput{flex:1;padding:8px;border-radius:4px;border:1px solid rgba(0,255,150,0.10);background:transparent;color:var(--neon);outline:none;font-family:monospace;}
 .cmd-btn{padding:8px 10px;border-radius:6px;border:none;background:var(--neon);color:#000;cursor:pointer;font-family:monospace}
 .cmd-btn:hover{background:var(--accent)}
-
-@media(max-width:720px){#intro h1{font-size:1.2rem;letter-spacing:1.5px}#cmdPanel{height:260px}}
-@media(max-width:420px){#loginPanel{width:92%}}
+.small{width:120px;padding:6px;border-radius:6px;border:none;background:rgba(255,255,255,0.04);color:var(--neon);cursor:pointer}
+.small:hover{background:rgba(255,255,255,0.06)}
+.footer{margin-top:8px;font-size:0.9rem;color:rgba(0,255,150,0.6)}
+@media(max-width:720px){#intro h1{font-size:1.2rem;letter-spacing:1.5px}#cmdPanel{height:320px}}
+@media(max-width:420px){.panel{width:92%}}
 </style>
 </head>
 <body>
@@ -95,102 +44,488 @@ canvas#matrix{position:fixed;inset:0;z-index:0;display:block}
   <div id="loadingText">[       ]</div>
 </div>
 
-<div id="loginPanel" aria-hidden="true">
+<!-- 로그인 -->
+<div id="loginPanel" class="panel" aria-hidden="true">
   <h2>TERMINAL LOGIN</h2>
   <input id="username" type="text" placeholder="ID" autocomplete="off" />
   <input id="password" type="password" placeholder="PASSWORD" autocomplete="off" />
-  <br>
-  <button id="enterBtn" onclick="checkLogin()">ENTER</button>
+  <button onclick="checkLogin()">ENTER</button>
+  <button style="background:var(--accent)" onclick="showSignup()">SIGN UP</button>
   <div id="accessMsg" role="status" aria-live="polite"></div>
 </div>
 
-<div id="dashboard" aria-hidden="true" style="display:none;">
+<!-- 회원가입 -->
+<div id="signupPanel" class="panel" aria-hidden="true">
+  <h2>REGISTER ACCOUNT</h2>
+  <input id="newUser" type="text" placeholder="NEW ID" autocomplete="off" />
+  <input id="newPass" type="password" placeholder="NEW PASSWORD" autocomplete="off" />
+  <button onclick="registerUser()">CREATE</button>
+  <button style="background:var(--accent)" onclick="backToLogin()">BACK</button>
+  <div id="signupMsg" role="status" aria-live="polite"></div>
+</div>
+
+<!-- 대시보드 -->
+<div id="dashboard" aria-hidden="true">
   <h2>SECURESCAN TERMINAL</h2>
+  <div style="width:90%;max-width:980px;margin-bottom:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <button class="small" onclick="writeLine('Welcome back, '+(currentUser||'guest') )">Info</button>
+    <button class="small" onclick="writeLine('Logged in as: '+(currentUser||'guest'))">Whoami</button>
+    <button class="small" onclick="downloadAllStorage()">Export Accounts</button>
+    <button class="small" onclick="clearSession()">Logout</button>
+    <div style="flex:1"></div>
+    <div class="footer">Tip: TAB for autocomplete, ↑/↓ for history</div>
+  </div>
+
   <div id="cmdPanel">
     <div id="cmdOutput" aria-live="polite"></div>
     <div class="cmd-line">
-      <div style="color:var(--accent);min-width:90px">C:\User\You&gt;</div>
-      <input id="cmdInput" placeholder="Type command (ex: myip, help, clear, echo hello)" />
+      <div style="color:var(--accent);min-width:120px">C:\User\<span id="promptUser">You</span>&gt;</div>
+      <input id="cmdInput" placeholder="Type command (help → list of commands)" autocomplete="off" />
       <button class="cmd-btn" onclick="runCmd()">Run</button>
     </div>
   </div>
 </div>
 
+<input id="fileUploader" type="file" style="display:none" />
+
 <script>
-/* ---------- 매트릭스 배경 ---------- */
-const canvas=document.getElementById('matrix');const ctx=canvas.getContext('2d');
+/* ---------------- Matrix background ---------------- */
+const canvas=document.getElementById('matrix'), ctx=canvas.getContext('2d');
 function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
 resizeCanvas();window.addEventListener('resize',resizeCanvas);
-const cols=Math.floor(window.innerWidth/16);let drops=new Array(cols).fill(0);
+let cols=Math.floor(window.innerWidth/16); let drops=new Array(cols).fill(0);
 const letters='abcdefghijklmnopqrstuvwxyz0123456789ﾊﾐﾋﾌﾍﾎﾅﾆﾇﾈﾉｦｧｨｩｪｫｬｭｮｯ';
-function draw(){ctx.fillStyle='rgba(0,0,0,0.06)';ctx.fillRect(0,0,canvas.width,canvas.height);
-ctx.fillStyle='#00ff66';ctx.font='14px monospace';
-for(let i=0;i<drops.length;i++){const text=letters.charAt(Math.floor(Math.random()*letters.length));
-const x=i*16;const y=drops[i]*16;ctx.fillText(text,x,y);if(y>canvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;}}
+function draw(){
+  ctx.fillStyle='rgba(0,0,0,0.06)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#00ff66'; ctx.font='14px monospace';
+  if(cols !== Math.floor(window.innerWidth/16)){ cols=Math.floor(window.innerWidth/16); drops=new Array(cols).fill(0); }
+  for(let i=0;i<drops.length;i++){
+    const text=letters.charAt(Math.floor(Math.random()*letters.length));
+    const x=i*16; const y=drops[i]*16;
+    ctx.fillText(text,x,y);
+    if(y>canvas.height && Math.random()>0.975) drops[i]=0;
+    drops[i]++;
+  }
+}
 setInterval(draw,40);
 
-/* ---------- 로딩 ---------- */
+/* ---------- Loading intro -> login ---------- */
+const intro=document.getElementById('intro'), loginPanel=document.getElementById('loginPanel'), signupPanel=document.getElementById('signupPanel'), dashboard=document.getElementById('dashboard');
 const loadingText=document.getElementById('loadingText');
-const intro=document.getElementById('intro');
-const loginPanel=document.getElementById('loginPanel');
-const dashboard=document.getElementById('dashboard');
-let progress=0;const maxProgress=7;
-const loadInterval=setInterval(()=>{
-  progress++;
-  loadingText.textContent='['+'#'.repeat(progress)+' '.repeat(maxProgress-progress)+']';
-  if(progress>=maxProgress){
-    clearInterval(loadInterval);
-    intro.style.display='none';
-    loginPanel.style.display='block';
-    loginPanel.setAttribute('aria-hidden','false');
-    dashboard.style.display='none';
-    document.getElementById('username').focus();
-  }
-},300);
+let progress=0, maxProgress=7;
+const li=setInterval(()=>{ progress++; loadingText.textContent='['+'#'.repeat(progress)+' '.repeat(maxProgress-progress)+']'; if(progress>=maxProgress){ clearInterval(li); intro.style.display='none'; loginPanel.style.display='block'; document.getElementById('username').focus(); } },300);
 
-/* ---------- 로그인 ---------- */
-function showDashboard(){
-  loginPanel.style.display='none';
-  dashboard.style.display='flex';
+/* ---------- Simple account handling (localStorage) ---------- */
+let currentUser = null;
+function registerUser(){
+  const user=document.getElementById('newUser').value.trim();
+  const pass=document.getElementById('newPass').value.trim();
+  const msg=document.getElementById('signupMsg');
+  if(!user||!pass){ msg.textContent='Please enter both fields'; msg.style.color='var(--danger)'; return; }
+  if(localStorage.getItem('user_'+user)){ msg.textContent='ID already exists'; msg.style.color='var(--danger)'; return; }
+  localStorage.setItem('user_'+user, pass);
+  msg.textContent='Account created'; msg.style.color='var(--neon)';
+  setTimeout(()=>{ backToLogin(); msg.textContent=''; },900);
 }
+function showSignup(){ loginPanel.style.display='none'; signupPanel.style.display='block'; document.getElementById('newUser').focus(); }
+function backToLogin(){ signupPanel.style.display='none'; loginPanel.style.display='block'; document.getElementById('username').focus(); }
 function checkLogin(){
   const user=document.getElementById('username').value.trim();
   const pass=document.getElementById('password').value.trim();
   const msg=document.getElementById('accessMsg');
-  if(user==='admin'&&pass==='cyberpunk'){
-    msg.textContent='ACCESS GRANTED';msg.style.color='#00ff66';
-    setTimeout(showDashboard,700);
-  }else{
-    msg.textContent='ACCESS DENIED';msg.style.color='#ff4d4d';
-    setTimeout(()=>{msg.textContent='';},1000);
-  }
+  if(user==='admin' && pass==='cyberpunk'){ msg.textContent='ACCESS GRANTED'; msg.style.color='#00ff66'; currentUser='admin'; setTimeout(showDashboard,600); return; }
+  const stored = localStorage.getItem('user_'+user);
+  if(stored && stored === pass){ msg.textContent='ACCESS GRANTED'; msg.style.color='#00ff66'; currentUser=user; setTimeout(showDashboard,600); }
+  else{ msg.textContent='ACCESS DENIED'; msg.style.color='#ff4d4d'; setTimeout(()=>{ msg.textContent=''; },900); }
 }
-document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&loginPanel.style.display==='block')checkLogin();
-  if(e.key==='Enter'&&document.activeElement===document.getElementById('cmdInput'))runCmd();
-});
+function showDashboard(){ loginPanel.style.display='none'; signupPanel.style.display='none'; dashboard.style.display='flex'; document.getElementById('promptUser').textContent = currentUser || 'You'; cmdInput.focus(); writeLine('Welcome to SecureScan CMD — type "help" for commands.'); }
+function clearSession(){ currentUser=null; dashboard.style.display='none'; loginPanel.style.display='block'; document.getElementById('username').value=''; document.getElementById('password').value=''; document.getElementById('accessMsg').textContent=''; }
 
-/* ---------- CMD ---------- */
+/* ---------- Virtual filesystem (simple) ---------- */
+const vfsKey = 'secure_vfs_v1';
+let vfs = JSON.parse(localStorage.getItem(vfsKey) || 'null') || {
+  '/': {type:'dir', children: {'home':{type:'dir', children:{ 'readme.txt':{type:'file', content:'Welcome to SecureScan terminal.\nYou can create files with "touch" and read with "cat".'}}},},},
+};
+let cwd = '/home';
+function saveVfs(){ localStorage.setItem(vfsKey, JSON.stringify(vfs)); }
+function pathJoin(base, p){
+  if(!p) return base;
+  if(p.startsWith('/')) return p;
+  if(base === '/') return '/' + p;
+  return base.replace(/\/+$/,'') + '/' + p;
+}
+function getNode(p){
+  const parts = p.split('/').filter(Boolean);
+  let node = vfs['/'];
+  for(let i=0;i<parts.length;i++){
+    if(!node.children) return null;
+    node = node.children[parts[i]];
+    if(!node) return null;
+  }
+  return node;
+}
+function ensureParent(path){
+  const parts = path.split('/').filter(Boolean);
+  parts.pop();
+  let node = vfs['/'];
+  for(let i=0;i<parts.length;i++){
+    if(!node.children[parts[i]]) node.children[parts[i]] = {type:'dir', children:{}};
+    node = node.children[parts[i]];
+  }
+  return node;
+}
+
+/* ---------- CMD: history, autocomplete ---------- */
 const cmdOutput=document.getElementById('cmdOutput');
 const cmdInput=document.getElementById('cmdInput');
-function writeLine(text){const d=document.createElement('div');d.textContent=text;cmdOutput.appendChild(d);cmdOutput.scrollTop=cmdOutput.scrollHeight;}
-async function runCmd(){
-  const raw=(cmdInput.value||'').trim();if(!raw)return;
-  writeLine('C:\\User\\You> '+raw);cmdInput.value='';
-  const parts=raw.split(' ');const cmd=parts[0].toLowerCase();
-  if(cmd==='help'){writeLine('Available commands: myip, help, clear, echo <text>, date');return;}
-  if(cmd==='clear'){cmdOutput.innerHTML='';return;}
-  if(cmd==='echo'){writeLine(parts.slice(1).join(' '));return;}
-  if(cmd==='date'){writeLine(new Date().toString());return;}
-  if(cmd==='myip'){
-    writeLine('Fetching public IP...');
-    try{const res=await fetch('https://api.ipify.org?format=json');const data=await res.json();
-      writeLine('Public IP: '+(data.ip||'Unknown'));
-    }catch(err){writeLine('Unable to retrieve IP.');}
-    return;
-  }
-  writeLine(`'${cmd}' is not recognized as an internal or external command.`);
+let historyCmd = JSON.parse(localStorage.getItem('secure_history')||'[]');
+let historyIndex = historyCmd.length;
+function pushHistory(line){ if(!line) return; historyCmd.push(line); if(historyCmd.length>200) historyCmd.shift(); localStorage.setItem('secure_history', JSON.stringify(historyCmd)); historyIndex = historyCmd.length; }
+
+/* TAB autocomplete (basic) */
+const COMMANDS = ['help','clear','echo','date','time','myip','whoami','ls','pwd','cd','cat','touch','rm','mkdir','rmdir','upload','download','download-storage','ping','uptime','calc','rand','b64','b64d','sha256','history','set','get','env','export','import','grep','find','help-verbose'];
+cmdInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Tab'){ e.preventDefault();
+    const val = cmdInput.value.trim(); const parts = val.split(' '); if(parts.length===1){
+      const match = COMMANDS.find(c=>c.startsWith(parts[0]||'')); if(match) cmdInput.value = match + ' ';
+    }
+  } else if(e.key === 'ArrowUp'){ e.preventDefault();
+    if(historyIndex>0) historyIndex--; cmdInput.value = historyCmd[historyIndex] || '';
+  } else if(e.key === 'ArrowDown'){ e.preventDefault();
+    if(historyIndex < historyCmd.length-1) historyIndex++; else historyIndex = historyCmd.length;
+    cmdInput.value = historyCmd[historyIndex] || '';
+  } else if(e.key === 'Enter'){ e.preventDefault(); runCmd(); }
+});
+
+/* ---------- Utilities (safe) ---------- */
+function writeLine(text, klass){ const d = document.createElement('div'); if(klass) d.className=klass; d.textContent = text; cmdOutput.appendChild(d); cmdOutput.scrollTop = cmdOutput.scrollHeight; }
+function writeColor(text, color){ const d = document.createElement('div'); d.style.color=color; d.textContent=text; cmdOutput.appendChild(d); cmdOutput.scrollTop = cmdOutput.scrollHeight; }
+
+/* Safe arithmetic evaluator: allow digits, spaces, + - * / % ^ . and parentheses */
+function safeEval(expr){
+  if(!/^[0-9+\-*/%^().\s]+$/.test(expr)) throw new Error('Unsafe characters in expression');
+  // replace ^ with ** for exponent
+  expr = expr.replace(/\^/g,'**');
+  // eslint-disable-next-line no-new-func
+  return Function('"use strict";return ('+expr+')')();
 }
+
+/* SHA-256 helper */
+async function sha256Hex(text){
+  const enc = new TextEncoder();
+  const data = enc.encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const a = Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  return a;
+}
+
+/* ---------- File upload/download helpers ---------- */
+const uploader = document.getElementById('fileUploader');
+uploader.addEventListener('change', async (ev)=>{
+  const f = ev.target.files[0];
+  if(!f) return;
+  const content = await f.text();
+  const name = f.name;
+  const path = pathJoin(cwd, name);
+  ensureParent(path);
+  const parent = getNode(path.split('/').slice(0,-1).join('/') || '/');
+  const key = name;
+  if(!parent.children) parent.children = {};
+  parent.children[key] = {type:'file', content: content};
+  saveVfs();
+  writeLine(`Uploaded '${name}' to ${cwd}`);
+  uploader.value = '';
+});
+
+/* Export accounts (localStorage items starting with user_) */
+function downloadAllStorage(){
+  const out = {};
+  for(const k in localStorage) if(k.startsWith('user_') || k === vfsKey) out[k]=localStorage.getItem(k);
+  const blob = new Blob([JSON.stringify(out,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='secure_export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  writeLine('Exported accounts and vfs to secure_export.json');
+}
+
+/* ---------- Command implementations ---------- */
+let startTime = Date.now();
+
+async function dispatchCmd(raw){
+  raw = raw.trim(); if(!raw) return;
+  writeLine('C:\\User\\'+(currentUser||'You')+'> '+raw, 'cmd-in');
+  pushHistory(raw);
+  const parts = raw.split(' ').filter(Boolean);
+  const cmd = parts[0].toLowerCase();
+  const args = parts.slice(1);
+
+  try{
+    switch(cmd){
+      case 'help':
+        writeLine('Commands: '+COMMANDS.join(', '));
+        writeLine('Type "help-verbose" for more detailed descriptions.');
+        break;
+      case 'help-verbose':
+        writeLine([
+          'help                - brief list',
+          'clear               - clear screen',
+          'echo <text>         - print text',
+          'date                - current date/time string',
+          'time                - current time',
+          'myip                - fetch public ip (if CORS allows)',
+          'whoami              - current user',
+          'ls [path]           - list directory (virtual fs)',
+          'pwd                 - print working dir',
+          'cd <path>           - change directory',
+          'cat <file>          - show file content',
+          'touch <file>        - create empty file',
+          'rm <file>           - delete file',
+          'mkdir <name>        - create directory',
+          'rmdir <name>        - remove directory if empty',
+          'upload              - open file picker to upload into cwd',
+          'download <file>     - download file from vfs',
+          'download-storage    - export accounts & vfs as JSON',
+          'ping <host>         - simulated ping',
+          'uptime              - how long terminal running',
+          'calc <expr>         - evaluate arithmetic safely',
+          'rand [min] [max]    - random integer',
+          'b64 <text>          - base64 encode',
+          'b64d <text>         - base64 decode',
+          'sha256 <text>       - sha256 hash hex',
+          'history             - command history',
+          'set <k> <v>         - set env (localStorage)',
+          'get <k>             - get env',
+          'env                 - list env keys starting with "env_"',
+          'export <name>       - export file from vfs as download',
+          'import <json>       - import accounts/vfs (paste JSON string)',
+          'grep <term> <file>  - search term in file',
+          'find <name>         - find files/dirs by name under cwd'
+        ].join('\n'));
+        break;
+      case 'clear':
+        cmdOutput.innerHTML=''; break;
+      case 'echo':
+        writeLine(args.join(' ')); break;
+      case 'date':
+        writeLine(new Date().toString()); break;
+      case 'time':
+        writeLine(new Date().toLocaleTimeString()); break;
+      case 'myip':
+        writeLine('Fetching public IP...');
+        try{
+          const r = await fetch('https://api.ipify.org?format=json'); // may be CORS-limited
+          if(!r.ok) throw new Error('network');
+          const j = await r.json(); writeLine('Public IP: '+j.ip);
+        }catch(e){ writeLine('Unable to retrieve IP (CORS/network) — simulated: 203.0.113.'+Math.floor(Math.random()*255)); }
+        break;
+      case 'whoami':
+        writeLine(currentUser || 'guest'); break;
+      case 'pwd':
+        writeLine(cwd); break;
+      case 'ls': {
+        const target = args[0] ? pathJoin(cwd, args[0]) : cwd;
+        const node = getNode(target);
+        if(!node) writeLine('No such file or directory');
+        else if(node.type === 'file') writeLine(args[0] + ' (file)');
+        else {
+          const names = Object.keys(node.children||{}); if(names.length===0) writeLine('(empty)'); else writeLine(names.join('  '));
+        }
+        break;
+      }
+      case 'cd': {
+        const target = args[0] ? pathJoin(cwd, args[0]) : '/home';
+        const node = getNode(target);
+        if(!node || node.type !== 'dir') writeLine('No such directory: '+target);
+        else { cwd = target; writeLine('cwd: '+cwd); }
+        break;
+      }
+      case 'mkdir': {
+        if(!args[0]) { writeLine('Usage: mkdir <name>'); break; }
+        const full = pathJoin(cwd, args[0]);
+        const parent = ensureParent(full);
+        const key = full.split('/').filter(Boolean).pop();
+        if(parent.children[key]) { writeLine('Already exists'); break; }
+        parent.children[key] = {type:'dir', children:{}};
+        saveVfs(); writeLine('Directory created: '+full);
+        break;
+      }
+      case 'rmdir': {
+        if(!args[0]) { writeLine('Usage: rmdir <name>'); break; }
+        const full = pathJoin(cwd, args[0]);
+        const node = getNode(full);
+        if(!node) { writeLine('Not found'); break; }
+        if(node.type !== 'dir') { writeLine('Not a directory'); break; }
+        if(Object.keys(node.children||{}).length>0) { writeLine('Directory not empty'); break; }
+        // remove
+        const parent = getNode(full.split('/').slice(0,-1).join('/') || '/');
+        const key = full.split('/').filter(Boolean).pop();
+        delete parent.children[key]; saveVfs(); writeLine('Directory removed');
+        break;
+      }
+      case 'touch': {
+        if(!args[0]) { writeLine('Usage: touch <file>'); break; }
+        const full = pathJoin(cwd, args[0]); ensureParent(full);
+        const parent = getNode(full.split('/').slice(0,-1).join('/') || '/');
+        const key = full.split('/').filter(Boolean).pop();
+        parent.children[key] = {type:'file', content:''}; saveVfs(); writeLine('File created: '+full);
+        break;
+      }
+      case 'rm': {
+        if(!args[0]) { writeLine('Usage: rm <file>'); break; }
+        const full = pathJoin(cwd, args[0]);
+        const node = getNode(full);
+        if(!node) { writeLine('No such file'); break; }
+        if(node.type !== 'file') { writeLine('Not a file'); break; }
+        const parent = getNode(full.split('/').slice(0,-1).join('/')||'/');
+        const key = full.split('/').filter(Boolean).pop(); delete parent.children[key]; saveVfs(); writeLine('Removed '+full);
+        break;
+      }
+      case 'cat': {
+        if(!args[0]) { writeLine('Usage: cat <file>'); break; }
+        const full = pathJoin(cwd, args[0]);
+        const node = getNode(full);
+        if(!node) { writeLine('No such file'); break; }
+        if(node.type !== 'file') { writeLine('Not a file'); break; }
+        writeLine(node.content || '');
+        break;
+      }
+      case 'upload': {
+        writeLine('Opening file picker...'); uploader.click(); break;
+      }
+      case 'download': {
+        if(!args[0]) { writeLine('Usage: download <file>'); break; }
+        const full = pathJoin(cwd, args[0]); const node = getNode(full);
+        if(!node || node.type!=='file'){ writeLine('File not found'); break; }
+        const blob = new Blob([node.content], {type:'text/plain'}); const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download = args[0]; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        writeLine('Downloaded '+args[0]);
+        break;
+      }
+      case 'download-storage': downloadAllStorage(); break;
+      case 'ping': {
+        const host = args[0] || 'example.com';
+        // simulated ping times
+        for(let i=0;i<4;i++){
+          const t = 20 + Math.floor(Math.random()*120);
+          writeLine(`Reply from ${host}: time=${t}ms`);
+        }
+        break;
+      }
+      case 'uptime': {
+        const ms = Date.now() - startTime; const s = Math.floor(ms/1000)%60; const m = Math.floor(ms/60000)%60; const h = Math.floor(ms/3600000);
+        writeLine(`Uptime: ${h}h ${m}m ${s}s`); break;
+      }
+      case 'calc': {
+        if(args.length===0){ writeLine('Usage: calc <expression> (only + - * / % ^ parentheses)'); break; }
+        const expr = args.join(' ');
+        try{ const r = safeEval(expr); writeLine(String(r)); } catch(e){ writeLine('Invalid expression: '+e.message); }
+        break;
+      }
+      case 'rand': {
+        let min = parseInt(args[0]||'0',10); let max = parseInt(args[1]||'100',10);
+        if(isNaN(min) || isNaN(max)){ writeLine('Usage: rand [min] [max]'); break; }
+        if(min>max) [min,max]=[max,min];
+        writeLine(String(min + Math.floor(Math.random()*(max-min+1))));
+        break;
+      }
+      case 'b64': {
+        if(args.length===0){ writeLine('Usage: b64 <text>'); break; }
+        writeLine(btoa(args.join(' '))); break;
+      }
+      case 'b64d': {
+        if(args.length===0){ writeLine('Usage: b64d <b64>'); break; }
+        try{ writeLine(atob(args.join(' '))); }catch(e){ writeLine('Invalid base64 string'); } break;
+      }
+      case 'sha256': {
+        if(args.length===0){ writeLine('Usage: sha256 <text>'); break; }
+        const t = args.join(' ');
+        writeLine('Computing...'); const h = await sha256Hex(t); writeLine(h); break;
+      }
+      case 'history': {
+        if(historyCmd.length===0) writeLine('(no history)'); else writeLine(historyCmd.join('\n')); break;
+      }
+      case 'set': {
+        if(args.length<2){ writeLine('Usage: set <k> <v>'); break; }
+        localStorage.setItem('env_'+args[0], args.slice(1).join(' ')); writeLine('Set env_'+args[0]); break;
+      }
+      case 'get': {
+        if(args.length<1){ writeLine('Usage: get <k>'); break; }
+        writeLine(localStorage.getItem('env_'+args[0]) || '(null)'); break;
+      }
+      case 'env': {
+        const out = []; for(const k in localStorage) if(k.startsWith('env_')) out.push(`${k}=${localStorage.getItem(k)}`); writeLine(out.join('\n')||'(no env)'); break;
+      }
+      case 'export': {
+        if(!args[0]){ writeLine('Usage: export <file>'); break; }
+        // export a vfs file or directory as JSON
+        const node = getNode(pathJoin(cwd,args[0])); if(!node){ writeLine('Not found'); break; }
+        const blob = new Blob([JSON.stringify(node,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob);
+        const a=document.createElement('a'); a.href=url; a.download = args[0].replace(/\//g,'_') + '.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        writeLine('Exported '+args[0]); break;
+      }
+      case 'import': {
+        if(args.length===0){ writeLine('Usage: import <json> (paste JSON)'); break; }
+        try{
+          const j = JSON.parse(args.join(' '));
+          // if it looks like accounts/vfs wrapper
+          if(typeof j === 'object'){
+            for(const k in j) localStorage.setItem(k, j[k]);
+            writeLine('Imported JSON into localStorage (keys: '+Object.keys(j).join(', ')+')');
+          } else writeLine('Unsupported JSON');
+        }catch(e){ writeLine('Invalid JSON: '+e.message); }
+        break;
+      }
+      case 'grep': {
+        if(args.length<2){ writeLine('Usage: grep <term> <file>'); break; }
+        const term = args[0]; const f = args[1];
+        const node = getNode(pathJoin(cwd,f));
+        if(!node || node.type!=='file'){ writeLine('File not found'); break; }
+        const lines = (node.content||'').split('\n'); const res = lines.filter(L=>L.includes(term));
+        if(res.length===0) writeLine('(no matches)'); else writeLine(res.join('\n'));
+        break;
+      }
+      case 'find': {
+        if(!args[0]){ writeLine('Usage: find <name>'); break; }
+        const name = args[0];
+        const matches = [];
+        function walk(node, p){
+          for(const k in node.children||{}){
+            const child = node.children[k];
+            const path = (p==='/'?'/'+k:p+'/'+k).replace('//','/');
+            if(k.includes(name)) matches.push(path);
+            if(child.type==='dir') walk(child, path);
+          }
+        }
+        walk(vfs['/'],'/');
+        writeLine(matches.join('\n') || '(no matches)');
+        break;
+      }
+      default:
+        writeLine(`'${cmd}' is not recognized as a supported command. Try "help".`);
+    }
+  }catch(err){
+    writeLine('Error: '+err.message);
+    console.error(err);
+  }
+}
+
+/* wrapper for runCmd */
+async function runCmd(){ const raw = cmdInput.value || ''; cmdInput.value=''; await dispatchCmd(raw); cmdInput.focus(); }
+
+/* keyboard shortcuts */
+document.addEventListener('keydown', (e)=>{
+  // Enter handled in input listener; escape clears input
+  if(e.key==='Escape'){ cmdInput.value=''; }
+});
+
+/* initialize virtual fs if missing */
+if(!localStorage.getItem(vfsKey)) saveVfs();
+
+/* expose some helpful functions to console for debugging (optional) */
+window.__secure = { vfs, saveVfs, getNode, pathJoin, cwdRef: ()=>cwd };
+
+/* ensure prompt shows current user when logged in */
+setInterval(()=>{ document.getElementById('promptUser').textContent = currentUser || 'You'; },1000);
+
 </script>
 </body>
 </html>
