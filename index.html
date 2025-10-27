@@ -1,470 +1,165 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>CMD Terminal + VN (Local AI)</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,700&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VN AI Terminal</title>
 <style>
-:root{--bg:#000;--neon:#00ff66;--accent:#00ffd5;--warn:#ffb86b;--danger:#ff4d4d;}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--neon);font-family:'Playfair Display',serif;overflow:hidden}
-#terminal{position:fixed;inset:0;padding:18px;font-family:monospace;display:flex;flex-direction:column}
-#header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.brand{color:var(--accent);font-style:italic;font-weight:700}
-.status{color:rgba(0,255,150,0.4);font-size:0.9rem}
-#output{flex:1;overflow:auto;padding:12px;border-radius:6px;background:rgba(0,0,0,0.24);box-shadow:inset 0 0 20px rgba(0,0,0,0.6);white-space:pre-wrap}
-.cmd-line{display:flex;gap:8px;align-items:center;margin-top:10px}
-.prompt{color:var(--accent);min-width:140px}
-#cmdInput{flex:1;padding:10px;border-radius:6px;border:1px solid rgba(0,255,150,0.06);background:transparent;color:var(--neon);outline:none}
-.btn{padding:8px 12px;border-radius:6px;border:none;background:var(--neon);color:#000;cursor:pointer;font-family:monospace}
-.btn:hover{background:var(--accent)}
-.small{padding:6px 8px;border-radius:6px;border:none;background:rgba(255,255,255,0.03);color:var(--neon);cursor:pointer}
-.small:hover{background:rgba(255,255,255,0.05)}
-.footer{margin-top:8px;color:rgba(0,255,150,0.25);font-size:0.85rem}
-kbd{background:rgba(255,255,255,0.03);padding:2px 6px;border-radius:4px}
+body{margin:0;font-family:monospace;background:#0b0d0f;color:#fff;overflow:hidden}
+#terminal{padding:20px;display:flex;flex-direction:column;height:100vh;box-sizing:border-box}
+#output{flex:1;overflow:auto;margin-bottom:10px}
+#inputArea{display:flex;gap:8px}
+#cmdInput{flex:1;padding:8px;background:#0b0d0f;color:#fff;border:1px solid #0ff;outline:none;border-radius:4px}
+#cmdBtn{padding:8px 12px;border:none;border-radius:4px;background:#0ff;color:#000;cursor:pointer}
+.vn-line{color:#0ff;margin:2px 0;white-space:pre-wrap}
+.user-line{color:#fff;margin:2px 0;white-space:pre-wrap}
 </style>
 </head>
 <body>
-
-<div id="terminal" aria-live="polite">
-  <div id="header">
-    <div class="brand">SECURESCAN • TERMINAL</div>
-    <div class="status" id="sessionStatus">Not logged in</div>
-    <div style="flex:1"></div>
-    <button class="small" id="btnWhoami" title="whoami">whoami</button>
-    <button class="small" id="btnVN" title="vn help">vn</button>
-    <button class="small" id="btnClear" title="clear">clear</button>
-  </div>
-
+<div id="terminal">
   <div id="output"></div>
-
-  <div class="cmd-line">
-    <div class="prompt">C:\User\<span id="promptUser">Guest</span>></div>
-    <input id="cmdInput" placeholder="Type command (help → list)" autocomplete="off"/>
-    <button class="btn" id="runBtn">Run</button>
-  </div>
-
-  <div class="footer">Tip: use <kbd>Enter</kbd> to run — VN: local AI assistant (no API key required)</div>
-</div>
-
-<!-- Simple login/register modal (minimal) -->
-<div id="modal" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;pointer-events:none">
-  <div id="panel" style="width:360px;background:rgba(0,0,0,0.9);border:1px solid rgba(0,255,150,0.12);padding:20px;border-radius:8px;pointer-events:auto;display:none;">
-    <h3 style="margin:0 0 10px;color:var(--accent)">LOGIN / REGISTER</h3>
-    <div id="loginForm">
-      <input id="loginUser" placeholder="username" style="width:100%;padding:8px;margin-bottom:8px"/><br>
-      <input id="loginPass" type="password" placeholder="password" style="width:100%;padding:8px;margin-bottom:8px"/><br>
-      <div style="display:flex;gap:8px">
-        <button id="loginBtn" class="btn">Login</button>
-        <button id="regBtn" class="small">Register</button>
-        <button id="closeModal" class="small">Close</button>
-      </div>
-      <div id="loginMsg" style="margin-top:8px;height:18px"></div>
-    </div>
-    <div id="regForm" style="display:none">
-      <input id="newUser" placeholder="new username" style="width:100%;padding:8px;margin-bottom:8px"/><br>
-      <input id="newPass" type="password" placeholder="new password" style="width:100%;padding:8px;margin-bottom:8px"/><br>
-      <div style="display:flex;gap:8px">
-        <button id="createBtn" class="btn">Create</button>
-        <button id="backLogin" class="small">Back</button>
-      </div>
-      <div id="regMsg" style="margin-top:8px;height:18px"></div>
-    </div>
+  <div id="inputArea">
+    <input id="cmdInput" placeholder="Type command or '> spawn vnai'" autocomplete="off">
+    <button id="cmdBtn">Run</button>
   </div>
 </div>
 
 <script>
-/* ----------------- 기본 세팅 ----------------- */
-const output = document.getElementById('output');
-const cmdInput = document.getElementById('cmdInput');
-const runBtn = document.getElementById('runBtn');
-const btnClear = document.getElementById('btnClear');
-const btnWhoami = document.getElementById('btnWhoami');
-const btnVN = document.getElementById('btnVN');
-const promptUser = document.getElementById('promptUser');
-const sessionStatus = document.getElementById('sessionStatus');
+const output=document.getElementById('output');
+const input=document.getElementById('cmdInput');
+const btn=document.getElementById('cmdBtn');
+let vnActive=false;
 
-let currentUser = null; // 로그인 유저명 (local)
-let vnMemory = [];      // VN 대화 이력(세션)
-let startTime = Date.now();
+// VN 대화 응답
+const vnResponses={
+  ko:[
+    "반갑습니다, 사용자. 시스템은 안정적입니다.",
+    "오늘의 데이터 흐름은 평온합니다.",
+    "명령을 기다립니다.",
+    "분석 완료. 추가 요청이 있나요?"
+  ],
+  en:[
+    "System check complete. I'm ready.",
+    "Analyzing... curiosity detected.",
+    "Hello, user. I exist to learn and respond.",
+    "VN Core: online and listening."
+  ]
+};
 
-/* 로그인 modal 요소 */
-const modal = document.getElementById('modal');
-const panel = document.getElementById('panel');
-const loginForm = document.getElementById('loginForm');
-const regForm = document.getElementById('regForm');
-const loginUser = document.getElementById('loginUser');
-const loginPass = document.getElementById('loginPass');
-const loginBtn = document.getElementById('loginBtn');
-const regBtn = document.getElementById('regBtn');
-const closeModal = document.getElementById('closeModal');
-const newUser = document.getElementById('newUser');
-const newPass = document.getElementById('newPass');
-const createBtn = document.getElementById('createBtn');
-const backLogin = document.getElementById('backLogin');
-const loginMsg = document.getElementById('loginMsg');
-const regMsg = document.getElementById('regMsg');
-
-/* helper: 출력 */
-function writeLine(txt, color){
-  const el = document.createElement('div');
-  if(color) el.style.color = color;
-  el.textContent = txt;
-  output.appendChild(el);
-  output.scrollTop = output.scrollHeight;
-}
-
-/* show modal to login if not logged */
-function showLogin(){
-  modal.style.display = 'flex';
-  panel.style.display = 'block';
-  loginForm.style.display = 'block';
-  regForm.style.display = 'none';
-  loginUser.focus();
-  loginMsg.textContent = '';
-  regMsg.textContent = '';
-  // pointer events already enabled for panel
-}
-
-/* hide modal */
-function hideLogin(){
-  modal.style.display = 'none';
-  panel.style.display = 'none';
-}
-
-/* load session if exists (simple) */
-if(localStorage.getItem('sc_user')) {
-  currentUser = localStorage.getItem('sc_user');
-  promptUser.textContent = currentUser;
-  sessionStatus.textContent = 'Logged in as: ' + currentUser;
-  writeLine('Welcome back, ' + currentUser + '. Type "help" for commands.');
-} else {
-  sessionStatus.textContent = 'Not logged in (open login: click your name)';
-  // show login modal after short delay
-  setTimeout(()=>{ showLogin(); }, 500);
-}
-
-/* ----------------- 로그인/회원가입 ----------------- */
-loginBtn.addEventListener('click', ()=>{
-  const u = loginUser.value.trim();
-  const p = loginPass.value;
-  if(!u || !p){ loginMsg.style.color = 'var(--warn)'; loginMsg.textContent = 'Fill both fields'; return; }
-  const stored = localStorage.getItem('sc_user_' + u);
-  if(stored && stored === p){
-    currentUser = u;
-    localStorage.setItem('sc_user', u);
-    promptUser.textContent = currentUser;
-    sessionStatus.textContent = 'Logged in as: ' + currentUser;
-    loginMsg.style.color = 'var(--neon)'; loginMsg.textContent = 'ACCESS GRANTED';
-    hideLogin();
-    writeLine('ACCESS GRANTED — Hello, ' + currentUser + '.');
-    cmdInput.focus();
-  } else {
-    loginMsg.style.color = 'var(--danger)'; loginMsg.textContent = 'ACCESS DENIED';
-  }
-});
-
-regBtn.addEventListener('click', ()=>{
-  loginForm.style.display = 'none';
-  regForm.style.display = 'block';
-  newUser.focus();
-});
-
-createBtn.addEventListener('click', ()=>{
-  const u = newUser.value.trim();
-  const p = newPass.value;
-  if(!u || !p){ regMsg.style.color = 'var(--warn)'; regMsg.textContent = 'Fill both'; return; }
-  if(localStorage.getItem('sc_user_' + u)){ regMsg.style.color = 'var(--danger)'; regMsg.textContent = 'User exists'; return; }
-  localStorage.setItem('sc_user_' + u, p);
-  regMsg.style.color = 'var(--neon)'; regMsg.textContent = 'Created';
-  setTimeout(()=>{ loginForm.style.display = 'block'; regForm.style.display='none'; loginUser.value = u; loginPass.value = p; loginMsg.textContent=''; regMsg.textContent=''; }, 700);
-});
-
-backLogin.addEventListener('click', ()=>{
-  regForm.style.display = 'none';
-  loginForm.style.display = 'block';
-});
-
-closeModal.addEventListener('click', ()=>{ hideLogin(); });
-
-/* click prompt user to open login */
-promptUser.parentElement.addEventListener('click', ()=>{
-  showLogin();
-});
-
-/* ----------------- whoami (실제 정보 수집) ----------------- */
-async function whoamiCommand(){
-  writeLine('Gathering user info...');
-  const user = currentUser || 'Guest';
-  // OS/Browser detection (basic)
-  const ua = navigator.userAgent || '';
-  const platform = navigator.platform || '';
-  const os = parseOS(ua);
-  const browser = parseBrowser(ua);
-  const resolution = `${window.screen.width}x${window.screen.height}`;
-  let ipDisplay = '(unknown)';
-  try {
-    const r = await fetch('https://api.ipify.org?format=json');
-    const j = await r.json();
-    ipDisplay = j.ip || ipDisplay;
-  } catch(e) {
-    // fallback simulated masked ip
-    ipDisplay = '198.51.100.' + Math.floor(Math.random()*255);
-  }
-  writeLine(`Username: ${user}`);
-  writeLine(`System: ${os}`);
-  writeLine(`Browser: ${browser}`);
-  writeLine(`IP: ${ipDisplay}`);
-  writeLine(`Resolution: ${resolution}`);
-}
-
-/* simple parsers */
-function parseOS(ua){
-  ua = ua.toLowerCase();
-  if(ua.includes('windows')) return 'Windows';
-  if(ua.includes('android')) return 'Android';
-  if(ua.includes('iphone') || ua.includes('ipad') || ua.includes('ios')) return 'iOS';
-  if(ua.includes('mac os x')) return 'macOS';
-  if(ua.includes('linux')) return 'Linux';
-  return navigator.platform || 'Unknown';
-}
-function parseBrowser(ua){
-  ua = ua.toLowerCase();
-  if(ua.includes('edg/')) return 'Edge';
-  if(ua.includes('opr/') || ua.includes('opera')) return 'Opera';
-  if(ua.includes('chrome') && !ua.includes('edg/')) return 'Chrome';
-  if(ua.includes('safari') && !ua.includes('chrome')) return 'Safari';
-  if(ua.includes('firefox')) return 'Firefox';
-  return 'Unknown';
-}
-
-/* ----------------- VN (로컬 AI 어시스턴트) ----------------- */
-/*
- Approach:
- - 키워드/의도 매칭 + 템플릿 응답
- - 세션 메모리(vnMemory)에 최근 대화 저장 -> 컨텍스트 사용
- - fallback: 다양한 랜덤 템플릿으로 '그럴싸한' 응답 생성
- - 명령어: vn help, vn whoami, vn explain <cmd>, vn chat <text>, vn joke, vn exit
-*/
-
-function vnRespondRaw(prompt){
-  // store user input
-  vnMemory.push({role:'user', text:prompt, ts:Date.now()});
-  // basic intent detection
-  const p = prompt.toLowerCase().trim();
-  // explicit commands
-  if(p === 'help' || p === 'h') return vnReply("VN: I can help with: explain, whoami, joke, chat, suggest. Try 'vn explain ping' or 'vn chat hello'.");
-  if(p === 'whoami') {
-    // short VN-style summary (doesn't call ip again)
-    const user = currentUser || 'guest';
-    const os = parseOS(navigator.userAgent || '');
-    const browser = parseBrowser(navigator.userAgent || '');
-    return vnReply(`You are ${user}. Running on ${os} via ${browser}. I can fetch IP with 'whoami' command.`);
-  }
-  if(p.startsWith('explain ')){
-    const target = p.split(/\s+/).slice(1).join(' ');
-    return vnExplain(target);
-  }
-  if(p.startsWith('chat ')){
-    const txt = prompt.slice(5).trim();
-    return vnChatReply(txt);
-  }
-  if(p === 'joke') return vnReply(randomChoice([
-    "Why did the packet cross the network? To get to the other side.",
-    "Hacker joke: I told my shell a joke — it returned a newline.",
-    "Error 418: I'm a teapot — coffee not found."
-  ]));
-  if(p === 'exit') return vnReply("VN session closed. Type normal commands again.");
-  // fallback: try to answer short Q/A by pattern matching
-  if(p.startsWith('what') || p.startsWith('how') || p.startsWith('why') || p.includes('?')){
-    // use simple heuristics and templates
-    return vnAnswerQuestion(p);
-  }
-  // short command like "ping" -> assist
-  if(p.match(/^(ping|myip|date|whoami|help)$/)) return vnReply(`I can assist with '${p}'. Try 'vn explain ${p}'.`);
-  // default small talk
-  return vnReply(randomChoice([
-    "I can assist — try 'vn help' for examples.",
-    "Say 'vn explain <command>' or 'vn chat <message>'.",
-    "VN online. What's your target operation?"
-  ]));
-}
-
-/* VN helper to reply and store memory */
-function vnReply(text){
-  vnMemory.push({role:'vn', text, ts:Date.now()});
-  return text;
-}
-
-/* detailed explain toolbox */
-function vnExplain(target){
-  const t = target.toLowerCase();
-  const map = {
-    'ping': "ping <host> — measures network latency by attempting an HTTP request; in this terminal it's a lightweight fetch-based probe.",
-    'myip': "myip — fetches your public IP from an external service (if reachable).",
-    'whoami': "whoami — returns username and local device details (OS/browser/resolution).",
-    'help': "help — lists available commands.",
-    'echo': "echo <text> — prints text back to terminal.",
-    'clear': "clear — clears terminal output.",
-    'vn': "vn <query> — local VN assistant. Use 'vn explain <cmd>' or 'vn chat <text>'."
-  };
-  if(map[t]) return vnReply(map[t]);
-  // fuzzy fallback: check for words
-  if(t.includes('ip')) return vnReply("IP relates to network address. Use 'myip' to retrieve your public IP.");
-  if(t.includes('ping')) return vnReply(map['ping']);
-  return vnReply("I don't have a prebuilt explanation for '" + target + "'. Try 'vn help' or ask a specific question.");
-}
-
-/* vn Chat reply: simple echo + pattern templating */
-function vnChatReply(text){
-  const lower = text.toLowerCase();
-  if(lower.includes('hello') || lower.includes('hi')) return vnReply("Hey — VN at your service. What do you want to check?");
-  if(lower.includes('help')) return vnReply("I can explain commands, show whoami summary, or tell jokes. Try 'vn explain ping'.");
-  // if user asks for suggestion
-  if(lower.includes('suggest') || lower.includes('idea')) return vnReply("Try running 'vn explain ping' then 'ping example.com' to test network latency.");
-  // generic: reply using simple transform and context
-  const recentUser = vnMemory.slice().reverse().find(m => m.role === 'user' && m.text !== text);
-  const ref = recentUser ? ` (previous: "${recentUser.text.slice(0,40)}${recentUser.text.length>40?'...':''}")` : '';
-  return vnReply("I heard: \"" + text + "\"." + ref + " — what do you want me to do with it?");
-}
-
-/* question answering fallback */
-function vnAnswerQuestion(q){
-  // predefined Q/A short set
-  const qa = [
-    {k: 'how to ping', a: "Use 'ping <host>' — example: ping google.com"},
-    {k: 'what is ip', a: "IP is an address that identifies your network endpoint on the internet."},
-    {k: 'how to login', a: "Use the login modal: click the username on the prompt or open the login panel."}
-  ];
-  const found = qa.find(x => q.includes(x.k.split(' ')[0]));
-  if(found) return vnReply(found.a);
-  // otherwise polite fallback
-  return vnReply("That's a good question. I don't have an exact answer stored locally, but you can ask 'vn explain <command>' or phrase differently.");
-}
-
-/* tiny util */
-function randomChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-/* ----------------- Command dispatch ----------------- */
-async function dispatch(cmdLine){
-  const raw = (cmdLine||'').trim();
-  if(!raw) return;
-  writeLine('C:\\User\\' + (currentUser||'Guest') + '> ' + raw);
-  const parts = raw.split(/\s+/);
-  const cmd = parts[0].toLowerCase();
-  const args = parts.slice(1);
-  try {
-    switch(cmd){
-      case 'help':
-        writeLine([
-          'Available commands:',
-          '-------------------------------------------',
-          'help        - show this list',
-          'whoami      - show full user & device info',
-          'myip        - fetch your public IP',
-          'ping <host> - measure basic latency (fetch)',
-          'echo <txt>  - print text',
-          'vn <query>  - VN local assistant (vn help for examples)',
-          'clear       - clear screen',
-          'exit        - logout (clear session)',
-          '-------------------------------------------'
-        ].join('\n'));
-        break;
-
-      case 'whoami':
-        await whoamiCommand();
-        break;
-
-      case 'myip':
-        writeLine('Fetching public IP...');
-        try{
-          const r = await fetch('https://api.ipify.org?format=json');
-          const j = await r.json();
-          writeLine('Public IP: ' + (j.ip || '(unknown)'));
-        } catch(e){
-          writeLine('Unable to fetch IP (network/CORS).');
-        }
-        break;
-
-      case 'ping':
-        if(!args[0]) { writeLine('Usage: ping <host>'); break; }
-        {
-          const host = args[0];
-          writeLine('Pinging ' + host + ' (http fetch) ...');
-          const start = performance.now();
-          try{
-            // try https first; if no CORS, still measure attempt time (no response body)
-            await fetch((host.startsWith('http')?host:'https://'+host), {mode:'no-cors'});
-            const ms = (performance.now() - start).toFixed(1);
-            writeLine(`Reply from ${host}: time=${ms}ms`);
-          }catch(e){
-            const ms = (performance.now() - start).toFixed(1);
-            writeLine(`No CORS response, measured RTT ~ ${ms}ms (best-effort).`);
-          }
-        }
-        break;
-
-      case 'echo':
-        writeLine(args.join(' '));
-        break;
-
-      case 'vn':
-        {
-          const query = args.join(' ').trim();
-          if(!query){ writeLine("VN examples: 'vn help', 'vn explain ping', 'vn chat hello', 'vn whoami'"); break; }
-          // show typing simulation
-          writeLine('VN is thinking...');
-          await sleep(300 + Math.random()*400);
-          const q = query;
-          // If the user asked 'vn help' we map to vnRespondRaw('help') etc.
-          let response = vnRespondRaw(q);
-          // if the function returned vnReply string, it's immediate; show
-          writeLine('VN: ' + response);
-        }
-        break;
-
-      case 'clear':
-        output.innerHTML = '';
-        break;
-
-      case 'exit':
-        // clear session
-        currentUser = null;
-        localStorage.removeItem('sc_user');
-        promptUser.textContent = 'Guest';
-        sessionStatus.textContent = 'Not logged in';
-        writeLine('Logged out.');
-        // show login modal
-        setTimeout(()=>{ showLogin(); }, 300);
-        break;
-
-      default:
-        writeLine(`'${cmd}' is not recognized. Try 'help'.`);
-    }
-  } catch(err){
-    writeLine('Error: ' + err.message);
-    console.error(err);
+// 타이핑 출력
+async function typeLine(text,klass){
+  const div=document.createElement('div');
+  div.className=klass||'vn-line';
+  output.appendChild(div);
+  for(let i=0;i<text.length;i++){
+    div.textContent+=text[i];
+    await new Promise(r=>setTimeout(r,25));
+    output.scrollTop=output.scrollHeight;
   }
 }
 
-/* tiny sleep */
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+// 언어 감지
+function isKorean(text){return /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(text);}
 
-/* ----------------- UI bindings ----------------- */
-runBtn.addEventListener('click', ()=>{ dispatch(cmdInput.value); cmdInput.value=''; });
-cmdInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); dispatch(cmdInput.value); cmdInput.value=''; }});
-btnClear.addEventListener('click', ()=>{ output.innerHTML = ''; });
-btnWhoami.addEventListener('click', ()=>{ dispatch('whoami'); });
-btnVN.addEventListener('click', ()=>{ dispatch('vn help'); });
+// CMD 기본 명령
+async function runCmd(){
+  const raw=input.value.trim();
+  if(!raw)return;
+  input.value='';
+  const lower=raw.toLowerCase();
 
-/* allow initial focus casually */
-setTimeout(()=>{ cmdInput.focus(); }, 400);
+  if(vnActive && !lower.startsWith('> exit vnai')){ 
+    // VN 대화 모드
+    const lang=isKorean(raw)?'ko':'en';
+    const resp=vnResponses[lang][Math.floor(Math.random()*vnResponses[lang].length)];
+    const userLine=document.createElement('div'); userLine.className='user-line';
+    userLine.textContent='You: '+raw; output.appendChild(userLine);
+    await typeLine('VN: '+resp);
+    return;
+  }
 
-/* expose for debugging */
-window.__VN = { memory: vnMemory, whoamiCommand, vnRespondRaw };
+  if(lower==='> spawn vnai'){
+    vnActive=true;
+    await typeLine('[INITIALIZING VN CORE...]');
+    await typeLine('VN SYSTEM ONLINE. Conversation mode activated.');
+    return;
+  }
+  if(lower==='> exit vnai'){
+    vnActive=false;
+    await typeLine('VN SYSTEM OFFLINE.');
+    return;
+  }
 
-/* end script */
+  // 기본 CMD 명령 처리
+  if(lower==='whoami'){
+    const info=navigator.userAgent;
+    await typeLine('User info: '+info);
+    return;
+  }
+  if(lower==='myip'){
+    await typeLine('Fetching public IP...');
+    try{
+      const res=await fetch('https://api.ipify.org?format=json');
+      const data=await res.json();
+      await typeLine('Public IP: '+data.ip);
+    }catch(e){await typeLine('Failed to fetch IP.');}
+    return;
+  }
+  if(lower==='time'){
+    await typeLine('Current time: '+new Date().toLocaleString());
+    return;
+  }
+  if(lower.startsWith('weather ')){
+    const city=raw.slice(8).trim();
+    if(!city){await typeLine('Usage: weather <city>'); return;}
+    await typeLine(`Fetching weather for ${city}...`);
+    try{
+      const res=await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
+      const data=await res.json();
+      const temp=data.current_condition[0].temp_C;
+      const cond=data.current_condition[0].weatherDesc[0].value;
+      await typeLine(`${city} 현재 날씨: ${temp}°C, ${cond}`);
+    }catch(e){await typeLine('Weather fetch failed.');}
+    return;
+  }
+  if(lower==='news'){
+    await typeLine('Fetching latest news...');
+    try{
+      const res=await fetch('https://api.currentsapi.services/v1/latest-news?language=en&apiKey=demo'); // 실제 key 필요
+      const data=await res.json();
+      for(let i=0;i<Math.min(3,data.news.length);i++){
+        await typeLine((i+1)+'. '+data.news[i].title);
+      }
+    }catch(e){await typeLine('Failed to fetch news.');}
+    return;
+  }
+  if(lower.startsWith('echo ')){
+    await typeLine(raw.slice(5));
+    return;
+  }
+  if(lower==='clear'){
+    output.innerHTML='';
+    return;
+  }
+  if(lower==='help'){
+    await typeLine('Available commands:');
+    await typeLine('whoami - Show browser info');
+    await typeLine('myip - Show public IP');
+    await typeLine('time - Current local time');
+    await typeLine('weather <city> - Show weather for city');
+    await typeLine('news - Latest 3 news items');
+    await typeLine('echo <text> - Print text');
+    await typeLine('clear - Clear terminal');
+    await typeLine('> spawn vnai - Activate AI conversation');
+    await typeLine('> exit vnai - Exit AI conversation');
+    return;
+  }
+  await typeLine(`'${raw}' is not recognized as a command.`);
+}
+
+// 버튼과 엔터 처리
+btn.addEventListener('click',runCmd);
+input.addEventListener('keydown',e=>{if(e.key==='Enter')runCmd()});
 </script>
 </body>
 </html>
