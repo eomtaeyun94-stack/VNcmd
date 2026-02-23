@@ -116,7 +116,6 @@ body{
 
 <body>
 
-<!-- 로그인 -->
 <div class="login-container" id="loginBox">
     <h2>서비스 접속</h2>
     <div class="input-group">
@@ -128,13 +127,11 @@ body{
     <button class="login-btn" onclick="startSystem()">로그인</button>
 </div>
 
-<!-- 로딩 -->
 <div id="loadingScreen">
     <div class="loader-circle"></div>
     <div id="progressText">Initializing system... 0%</div>
 </div>
 
-<!-- CMD -->
 <div id="cmd">
     <div id="output">System Ready.</div>
     <br>
@@ -143,10 +140,11 @@ body{
 
 <script>
 
-// 🔐 허용된 계정
+// 🔐 허용된 계정 3개
 const accounts = [
     { id: "seunghwan1127", pw: "123456789a" },
-    { id: "giseok", pw: "giseok090413" }
+    { id: "giseok", pw: "giseok090413" },
+    { id: "moonsun", pw: "nwnp" }   // ✅ 추가됨
 ];
 
 function startSystem(){
