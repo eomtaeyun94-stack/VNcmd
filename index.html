@@ -6,118 +6,97 @@
 <title>Service Access</title>
 
 <style>
-body{
-    margin:0;
-    background:#0f1115;
-    font-family:Arial, sans-serif;
-    color:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.container{
-    background:#181c24;
-    padding:40px;
-    border-radius:15px;
-    width:320px;
-    text-align:center;
-    box-shadow:0 0 20px rgba(0,0,0,0.6);
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #0c1220, #05070c);
+    font-family: 'Pretendard', sans-serif;
 }
 
-h1{
-    margin-bottom:20px;
-    font-size:22px;
+/* 로그인 카드 */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 25px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
 
-input{
-    width:100%;
-    padding:12px;
-    margin:8px 0;
-    border:none;
-    border-radius:8px;
-    background:#242a36;
-    color:white;
+/* 제목 */
+.login-container h2 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: 600;
 }
 
-button{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    border:none;
-    border-radius:8px;
-    background:#5865F2;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-    transition:0.2s;
+/* 입력창 공통 */
+.input-group {
+    margin-bottom: 18px;
 }
 
-button:hover{
-    background:#4752c4;
+.input-group input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    transition: 0.3s;
 }
 
-.status{
-    margin-top:15px;
-    font-size:14px;
+.input-group input:focus {
+    border-color: #6a75ff;
+}
+
+/* 버튼 */
+.login-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #5b6cff, #7a63ff);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-btn:hover {
+    opacity: 0.9;
 }
 </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>서비스 접속</h1>
+<div class="login-container">
+    <h2>서비스 접속</h2>
 
-    <input type="text" id="username" placeholder="아이디">
-    <input type="password" id="password" placeholder="비밀번호">
+    <div class="input-group">
+        <input type="text" placeholder="아이디">
+    </div>
 
-    <button onclick="login()">로그인</button>
+    <div class="input-group">
+        <input type="password" placeholder="비밀번호">
+    </div>
 
-    <div class="status" id="status"></div>
+    <button class="login-btn">로그인</button>
 </div>
-
-<script>
-
-// ⚠️ 테스트용 가짜 데이터
-// 실제 운영은 서버에서 처리해야 함
-const users = {
-    "buyer1": { password: "1234", approved: true },
-    "buyer2": { password: "1234", approved: false }
-};
-
-function login(){
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-    const status = document.getElementById("status");
-
-    if(!users[username]){
-        status.innerHTML = "존재하지 않는 계정입니다.";
-        status.style.color = "red";
-        return;
-    }
-
-    if(users[username].password !== password){
-        status.innerHTML = "비밀번호가 틀렸습니다.";
-        status.style.color = "red";
-        return;
-    }
-
-    if(!users[username].approved){
-        status.innerHTML = "관리자 승인 대기중입니다.";
-        status.style.color = "orange";
-        return;
-    }
-
-    status.innerHTML = "접속 승인 완료. 이동합니다...";
-    status.style.color = "lightgreen";
-
-    setTimeout(()=>{
-        window.location.href = "service.html"; // 실제 서비스 페이지
-    },1500);
-}
-
-</script>
 
 </body>
 </html>
