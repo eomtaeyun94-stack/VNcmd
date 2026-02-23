@@ -6,97 +6,155 @@
 <title>Service Access</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#05070c;
+    font-family:monospace;
+    overflow:hidden;
 }
 
-body {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(180deg, #0c1220, #05070c);
-    font-family: 'Pretendard', sans-serif;
+/* 로그인 */
+.login-container{
+    width:100%;
+    max-width:400px;
+    padding:40px 25px;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+}
+.login-container h2{
+    text-align:center;
+    color:#fff;
+    margin-bottom:30px;
+}
+.input-group{margin-bottom:18px}
+.input-group input{
+    width:100%;
+    padding:15px;
+    border-radius:12px;
+    border:2px solid rgba(255,255,255,0.2);
+    background:rgba(255,255,255,0.05);
+    color:#fff;
+}
+.login-btn{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(90deg,#5b6cff,#7a63ff);
+    color:white;
+    font-weight:600;
+    cursor:pointer;
 }
 
-/* 로그인 카드 */
-.login-container {
-    width: 100%;
-    max-width: 400px;
-    padding: 40px 25px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+/* 영상 */
+#introVideo{
+    position:absolute;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:none;
 }
 
-/* 제목 */
-.login-container h2 {
-    text-align: center;
-    color: #ffffff;
-    margin-bottom: 30px;
-    font-size: 24px;
-    font-weight: 600;
+/* CMD */
+#cmd{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:black;
+    color:#00ff00;
+    padding:20px;
+    display:none;
 }
-
-/* 입력창 공통 */
-.input-group {
-    margin-bottom: 18px;
+#output{
+    white-space:pre-line;
 }
-
-.input-group input {
-    width: 100%;
-    padding: 15px;
-    border-radius: 12px;
-    border: 2px solid rgba(255,255,255,0.2);
-    background: rgba(255,255,255,0.05);
-    color: #fff;
-    font-size: 15px;
-    outline: none;
-    transition: 0.3s;
-}
-
-.input-group input:focus {
-    border-color: #6a75ff;
-}
-
-/* 버튼 */
-.login-btn {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(90deg, #5b6cff, #7a63ff);
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.login-btn:hover {
-    opacity: 0.9;
+#commandInput{
+    background:black;
+    border:none;
+    color:#00ff00;
+    outline:none;
+    width:100%;
 }
 </style>
 </head>
 
 <body>
 
-<div class="login-container">
+<!-- 로그인 -->
+<div class="login-container" id="loginBox">
     <h2>서비스 접속</h2>
-
     <div class="input-group">
         <input type="text" placeholder="아이디">
     </div>
-
     <div class="input-group">
         <input type="password" placeholder="비밀번호">
     </div>
-
-    <button class="login-btn">로그인</button>
+    <button class="login-btn" onclick="startSystem()">로그인</button>
 </div>
+
+<!-- 영상 -->
+<video id="introVideo" src="yourvideo.mp4"></video>
+
+<!-- CMD -->
+<div id="cmd">
+    <div id="output"></div>
+    <br>
+    C:\system> <input type="text" id="commandInput" autofocus>
+</div>
+
+<script>
+function startSystem(){
+    document.getElementById("loginBox").style.display="none";
+    const video = document.getElementById("introVideo");
+    video.style.display="block";
+    video.play();
+
+    video.onended = function(){
+        video.style.display="none";
+        document.getElementById("cmd").style.display="block";
+    }
+}
+
+const input = document.getElementById("commandInput");
+const output = document.getElementById("output");
+
+input.addEventListener("keydown",function(e){
+    if(e.key==="Enter"){
+        let cmd = input.value.trim();
+        output.innerHTML += "\nC:\\system> " + cmd + "\n";
+        
+        if(cmd === "%pt didos"){
+            fakeProtection();
+        }else{
+            output.innerHTML += "Unknown command.\n";
+        }
+        input.value="";
+    }
+});
+
+function fakeProtection(){
+    let lines = [
+        "Initializing DDoS Protection...",
+        "Scanning incoming traffic...",
+        "Analyzing packet streams...",
+        "Blocking malicious IP addresses...",
+        "Activating firewall shield...",
+        "System secured successfully."
+    ];
+
+    let i=0;
+    let interval = setInterval(()=>{
+        output.innerHTML += lines[i] + "\n";
+        i++;
+        if(i>=lines.length) clearInterval(interval);
+    },800);
+}
+</script>
 
 </body>
 </html>
