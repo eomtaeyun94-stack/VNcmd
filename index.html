@@ -1,165 +1,123 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VN AI Terminal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Access</title>
+
 <style>
-body{margin:0;font-family:monospace;background:#0b0d0f;color:#fff;overflow:hidden}
-#terminal{padding:20px;display:flex;flex-direction:column;height:100vh;box-sizing:border-box}
-#output{flex:1;overflow:auto;margin-bottom:10px}
-#inputArea{display:flex;gap:8px}
-#cmdInput{flex:1;padding:8px;background:#0b0d0f;color:#fff;border:1px solid #0ff;outline:none;border-radius:4px}
-#cmdBtn{padding:8px 12px;border:none;border-radius:4px;background:#0ff;color:#000;cursor:pointer}
-.vn-line{color:#0ff;margin:2px 0;white-space:pre-wrap}
-.user-line{color:#fff;margin:2px 0;white-space:pre-wrap}
+body{
+    margin:0;
+    background:#0f1115;
+    font-family:Arial, sans-serif;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    background:#181c24;
+    padding:40px;
+    border-radius:15px;
+    width:320px;
+    text-align:center;
+    box-shadow:0 0 20px rgba(0,0,0,0.6);
+}
+
+h1{
+    margin-bottom:20px;
+    font-size:22px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border:none;
+    border-radius:8px;
+    background:#242a36;
+    color:white;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    background:#5865F2;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover{
+    background:#4752c4;
+}
+
+.status{
+    margin-top:15px;
+    font-size:14px;
+}
 </style>
 </head>
 <body>
-<div id="terminal">
-  <div id="output"></div>
-  <div id="inputArea">
-    <input id="cmdInput" placeholder="Type command or '> spawn vnai'" autocomplete="off">
-    <button id="cmdBtn">Run</button>
-  </div>
+
+<div class="container">
+    <h1>서비스 접속</h1>
+
+    <input type="text" id="username" placeholder="아이디">
+    <input type="password" id="password" placeholder="비밀번호">
+
+    <button onclick="login()">로그인</button>
+
+    <div class="status" id="status"></div>
 </div>
 
 <script>
-const output=document.getElementById('output');
-const input=document.getElementById('cmdInput');
-const btn=document.getElementById('cmdBtn');
-let vnActive=false;
 
-// VN 대화 응답
-const vnResponses={
-  ko:[
-    "반갑습니다, 사용자. 시스템은 안정적입니다.",
-    "오늘의 데이터 흐름은 평온합니다.",
-    "명령을 기다립니다.",
-    "분석 완료. 추가 요청이 있나요?"
-  ],
-  en:[
-    "System check complete. I'm ready.",
-    "Analyzing... curiosity detected.",
-    "Hello, user. I exist to learn and respond.",
-    "VN Core: online and listening."
-  ]
+// ⚠️ 테스트용 가짜 데이터
+// 실제 운영은 서버에서 처리해야 함
+const users = {
+    "buyer1": { password: "1234", approved: true },
+    "buyer2": { password: "1234", approved: false }
 };
 
-// 타이핑 출력
-async function typeLine(text,klass){
-  const div=document.createElement('div');
-  div.className=klass||'vn-line';
-  output.appendChild(div);
-  for(let i=0;i<text.length;i++){
-    div.textContent+=text[i];
-    await new Promise(r=>setTimeout(r,25));
-    output.scrollTop=output.scrollHeight;
-  }
+function login(){
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    const status = document.getElementById("status");
+
+    if(!users[username]){
+        status.innerHTML = "존재하지 않는 계정입니다.";
+        status.style.color = "red";
+        return;
+    }
+
+    if(users[username].password !== password){
+        status.innerHTML = "비밀번호가 틀렸습니다.";
+        status.style.color = "red";
+        return;
+    }
+
+    if(!users[username].approved){
+        status.innerHTML = "관리자 승인 대기중입니다.";
+        status.style.color = "orange";
+        return;
+    }
+
+    status.innerHTML = "접속 승인 완료. 이동합니다...";
+    status.style.color = "lightgreen";
+
+    setTimeout(()=>{
+        window.location.href = "service.html"; // 실제 서비스 페이지
+    },1500);
 }
 
-// 언어 감지
-function isKorean(text){return /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(text);}
-
-// CMD 기본 명령
-async function runCmd(){
-  const raw=input.value.trim();
-  if(!raw)return;
-  input.value='';
-  const lower=raw.toLowerCase();
-
-  if(vnActive && !lower.startsWith('> exit vnai')){ 
-    // VN 대화 모드
-    const lang=isKorean(raw)?'ko':'en';
-    const resp=vnResponses[lang][Math.floor(Math.random()*vnResponses[lang].length)];
-    const userLine=document.createElement('div'); userLine.className='user-line';
-    userLine.textContent='You: '+raw; output.appendChild(userLine);
-    await typeLine('VN: '+resp);
-    return;
-  }
-
-  if(lower==='> spawn vnai'){
-    vnActive=true;
-    await typeLine('[INITIALIZING VN CORE...]');
-    await typeLine('VN SYSTEM ONLINE. Conversation mode activated.');
-    return;
-  }
-  if(lower==='> exit vnai'){
-    vnActive=false;
-    await typeLine('VN SYSTEM OFFLINE.');
-    return;
-  }
-
-  // 기본 CMD 명령 처리
-  if(lower==='whoami'){
-    const info=navigator.userAgent;
-    await typeLine('User info: '+info);
-    return;
-  }
-  if(lower==='myip'){
-    await typeLine('Fetching public IP...');
-    try{
-      const res=await fetch('https://api.ipify.org?format=json');
-      const data=await res.json();
-      await typeLine('Public IP: '+data.ip);
-    }catch(e){await typeLine('Failed to fetch IP.');}
-    return;
-  }
-  if(lower==='time'){
-    await typeLine('Current time: '+new Date().toLocaleString());
-    return;
-  }
-  if(lower.startsWith('weather ')){
-    const city=raw.slice(8).trim();
-    if(!city){await typeLine('Usage: weather <city>'); return;}
-    await typeLine(`Fetching weather for ${city}...`);
-    try{
-      const res=await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
-      const data=await res.json();
-      const temp=data.current_condition[0].temp_C;
-      const cond=data.current_condition[0].weatherDesc[0].value;
-      await typeLine(`${city} 현재 날씨: ${temp}°C, ${cond}`);
-    }catch(e){await typeLine('Weather fetch failed.');}
-    return;
-  }
-  if(lower==='news'){
-    await typeLine('Fetching latest news...');
-    try{
-      const res=await fetch('https://api.currentsapi.services/v1/latest-news?language=en&apiKey=demo'); // 실제 key 필요
-      const data=await res.json();
-      for(let i=0;i<Math.min(3,data.news.length);i++){
-        await typeLine((i+1)+'. '+data.news[i].title);
-      }
-    }catch(e){await typeLine('Failed to fetch news.');}
-    return;
-  }
-  if(lower.startsWith('echo ')){
-    await typeLine(raw.slice(5));
-    return;
-  }
-  if(lower==='clear'){
-    output.innerHTML='';
-    return;
-  }
-  if(lower==='help'){
-    await typeLine('Available commands:');
-    await typeLine('whoami - Show browser info');
-    await typeLine('myip - Show public IP');
-    await typeLine('time - Current local time');
-    await typeLine('weather <city> - Show weather for city');
-    await typeLine('news - Latest 3 news items');
-    await typeLine('echo <text> - Print text');
-    await typeLine('clear - Clear terminal');
-    await typeLine('> spawn vnai - Activate AI conversation');
-    await typeLine('> exit vnai - Exit AI conversation');
-    return;
-  }
-  await typeLine(`'${raw}' is not recognized as a command.`);
-}
-
-// 버튼과 엔터 처리
-btn.addEventListener('click',runCmd);
-input.addEventListener('keydown',e=>{if(e.key==='Enter')runCmd()});
 </script>
+
 </body>
 </html>
