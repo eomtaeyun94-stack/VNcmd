@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sync System</title>
+<title>Glow Login System</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -17,7 +17,6 @@ body{
     color:#fff;
 }
 
-/* 전체 카드 글로우 */
 .page{
     width:400px;
     background:#141624;
@@ -66,7 +65,6 @@ body{
     box-shadow:0 0 15px rgba(88,101,242,.7);
 }
 
-/* 비번 일치 글로우 */
 .match{
     box-shadow:0 0 15px #00ff88 !important;
 }
@@ -119,7 +117,7 @@ body{
 <!-- 로그인 -->
 <div id="login-panel">
 <div class="panel-title">로그인</div>
-<div class="panel-sub">다시 만나서 반가워요</div>
+<div class="panel-sub">환영합니다</div>
 
 <div class="input-wrap">
 <input id="login-email" class="inp" type="email" placeholder="이메일">
@@ -140,7 +138,7 @@ body{
 <!-- 회원가입 -->
 <div id="register-panel" class="hidden">
 <div class="panel-title">회원가입</div>
-<div class="panel-sub">새 계정을 만들어보세요</div>
+<div class="panel-sub">관리자 키를 발급받으셨나요?</div>
 
 <div class="input-wrap">
 <input id="reg-name" class="inp" placeholder="이름">
@@ -175,7 +173,6 @@ function goTo(type){
     document.getElementById("register-panel").classList.toggle("hidden", type!=="register");
 }
 
-/* 🔥 실시간 비번 일치 체크 */
 const pw1 = document.getElementById("reg-pw");
 const pw2 = document.getElementById("reg-pw2");
 
