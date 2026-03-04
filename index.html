@@ -3,205 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Service Access</title>
+<title>Login System</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{
+    font-family:'Noto Sans KR',sans-serif;
+    background:linear-gradient(135deg,#1e1f29,#111);
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    background:#0c0f17;
-    font-family: 'Segoe UI', sans-serif;
-    overflow:hidden;
-    color:white;
-}
-
-/* 로그인 */
-.login-container{
-    width:100%;
-    max-width:400px;
-    padding:40px 25px;
-    background:rgba(255,255,255,0.05);
-    backdrop-filter:blur(20px);
-    border-radius:20px;
-    box-shadow:0 0 40px rgba(0,0,0,0.4);
-}
-.login-container h2{
-    text-align:center;
-    margin-bottom:30px;
-    font-weight:500;
-}
-.input-group{margin-bottom:18px}
-.input-group input{
-    width:100%;
-    padding:15px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,0.15);
-    background:rgba(255,255,255,0.08);
     color:#fff;
-    font-size:14px;
 }
-.login-btn{
+.page{
+    width:380px;
+    background:#1a1b25;
+    border-radius:20px;
+    padding:40px;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    position:relative;
+    overflow:hidden;
+}
+.panel-title{font-size:24px;font-weight:700;margin-bottom:8px}
+.panel-sub{font-size:14px;color:#aaa;margin-bottom:25px}
+.input-wrap{
+    position:relative;
+    margin-bottom:15px;
+}
+.inp{
     width:100%;
-    padding:15px;
+    padding:12px;
     border:none;
-    border-radius:12px;
-    background:linear-gradient(90deg,#4e73ff,#6a5bff);
-    color:white;
-    font-weight:600;
+    border-radius:10px;
+    background:#2a2b38;
+    color:#fff;
+}
+.inp:focus{outline:2px solid #5865f2}
+.btn-primary{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#5865f2;
+    color:#fff;
     cursor:pointer;
-    transition:0.3s;
+    margin-top:10px;
 }
-.login-btn:hover{
-    opacity:0.85;
+.btn-primary:hover{opacity:.9}
+.switch-link{
+    margin-top:15px;
+    text-align:center;
+    font-size:13px;
 }
-
-/* 로딩 화면 */
-#loadingScreen{
+.switch-link span{
+    color:#5865f2;
+    cursor:pointer;
+}
+.field-error{
+    color:#ff5c5c;
+    font-size:12px;
+    margin-bottom:10px;
+}
+.pw-toggle{
     position:absolute;
-    width:100%;
-    height:100%;
-    background:#0c0f17;
-    display:none;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-}
-
-.loader-circle{
-    width:80px;
-    height:80px;
-    border:4px solid rgba(255,255,255,0.1);
-    border-top:4px solid #6a5bff;
-    border-radius:50%;
-    animation:spin 1s linear infinite;
-    margin-bottom:20px;
-}
-
-@keyframes spin{
-    0%{transform:rotate(0deg)}
-    100%{transform:rotate(360deg)}
-}
-
-#progressText{
-    font-size:14px;
-    opacity:0.8;
-}
-
-/* CMD */
-#cmd{
-    position:absolute;
-    width:100%;
-    height:100%;
-    background:#111319;
-    color:#eaeaea;
-    padding:25px;
-    display:none;
-    font-family:monospace;
-}
-#output{
-    white-space:pre-line;
-}
-#commandInput{
-    background:transparent;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
     border:none;
-    color:white;
-    outline:none;
-    width:100%;
+    color:#aaa;
+    cursor:pointer;
 }
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
-<div class="login-container" id="loginBox">
-    <h2>서비스 접속</h2>
-    <div class="input-group">
-        <input type="text" id="userId" placeholder="아이디">
-    </div>
-    <div class="input-group">
-        <input type="password" id="userPw" placeholder="비밀번호">
-    </div>
-    <button class="login-btn" onclick="startSystem()">로그인</button>
+<div class="page">
+
+<!-- 로그인 -->
+<div id="login-panel">
+<div class="panel-title">로그인</div>
+<div class="panel-sub">다시 만나서 반가워요</div>
+
+<div class="input-wrap">
+<input id="login-email" class="inp" type="email" placeholder="이메일">
 </div>
 
-<div id="loadingScreen">
-    <div class="loader-circle"></div>
-    <div id="progressText">Initializing system... 0%</div>
+<div class="input-wrap">
+<input id="login-pw" class="inp" type="password" placeholder="비밀번호">
+<button class="pw-toggle" onclick="togglePw('login-pw')">👁</button>
 </div>
 
-<div id="cmd">
-    <div id="output">System Ready.</div>
-    <br>
-    C:\system> <input type="text" id="commandInput" autofocus>
+<div id="login-error" class="field-error hidden"></div>
+<button class="btn-primary" onclick="login()">로그인</button>
+
+<div class="switch-link">
+계정이 없으신가요? <span onclick="goTo('register')">회원가입</span>
+</div>
+</div>
+
+<!-- 회원가입 -->
+<div id="register-panel" class="hidden">
+<div class="panel-title">회원가입</div>
+<div class="panel-sub">새 계정을 만들어보세요</div>
+
+<div class="input-wrap">
+<input id="reg-name" class="inp" placeholder="이름">
+</div>
+
+<div class="input-wrap">
+<input id="reg-email" class="inp" type="email" placeholder="이메일">
+</div>
+
+<div class="input-wrap">
+<input id="reg-pw" class="inp" type="password" placeholder="비밀번호">
+<button class="pw-toggle" onclick="togglePw('reg-pw')">👁</button>
+</div>
+
+<div class="input-wrap">
+<input id="reg-pw2" class="inp" type="password" placeholder="비밀번호 확인">
+<button class="pw-toggle" onclick="togglePw('reg-pw2')">👁</button>
+</div>
+
+<div id="reg-error" class="field-error hidden"></div>
+<button class="btn-primary" onclick="register()">가입하기</button>
+
+<div class="switch-link">
+이미 계정이 있으신가요? <span onclick="goTo('login')">로그인</span>
+</div>
+</div>
+
 </div>
 
 <script>
+function goTo(type){
+    document.getElementById("login-panel").classList.toggle("hidden", type!=="login");
+    document.getElementById("register-panel").classList.toggle("hidden", type!=="register");
+}
 
-// 🔐 허용된 계정 3개
-const accounts = [
-    { id: "seunghwan1127", pw: "123456789a" },
-    { id: "giseok", pw: "giseok090413" },
-    { id: "moonsun", pw: "nwnp" }   // ✅ 추가됨
-];
+function togglePw(id){
+    const input=document.getElementById(id);
+    input.type=input.type==="password"?"text":"password";
+}
 
-function startSystem(){
-    const inputId = document.getElementById("userId").value.trim();
-    const inputPw = document.getElementById("userPw").value.trim();
+function register(){
+    const name=document.getElementById("reg-name").value;
+    const email=document.getElementById("reg-email").value;
+    const pw=document.getElementById("reg-pw").value;
+    const pw2=document.getElementById("reg-pw2").value;
+    const error=document.getElementById("reg-error");
 
-    const valid = accounts.some(acc => 
-        acc.id === inputId && acc.pw === inputPw
-    );
-
-    if(!valid){
-        alert("아이디 또는 비밀번호가 틀렸습니다.");
+    if(!name||!email||!pw){
+        error.innerText="모든 항목을 입력하세요.";
+        error.classList.remove("hidden");
+        return;
+    }
+    if(pw!==pw2){
+        error.innerText="비밀번호가 일치하지 않습니다.";
+        error.classList.remove("hidden");
         return;
     }
 
-    document.getElementById("loginBox").style.display="none";
-    const loading = document.getElementById("loadingScreen");
-    loading.style.display="flex";
+    let users=JSON.parse(localStorage.getItem("users")||"[]");
 
-    let percent = 0;
-    const text = document.getElementById("progressText");
+    if(users.find(u=>u.email===email)){
+        error.innerText="이미 존재하는 이메일입니다.";
+        error.classList.remove("hidden");
+        return;
+    }
 
-    const interval = setInterval(()=>{
-        percent += Math.floor(Math.random()*8)+3;
-        if(percent >= 100){
-            percent = 100;
-            clearInterval(interval);
-            text.innerText = "System Ready. 100%";
-
-            setTimeout(()=>{
-                loading.style.display="none";
-                document.getElementById("cmd").style.display="block";
-                document.getElementById("commandInput").focus();
-            },800);
-        }else{
-            text.innerText = "Initializing system... " + percent + "%";
-        }
-    },200);
+    users.push({name,email,pw});
+    localStorage.setItem("users",JSON.stringify(users));
+    alert("회원가입 완료!");
+    goTo("login");
 }
 
-// CMD
-const input = document.getElementById("commandInput");
-const output = document.getElementById("output");
+function login(){
+    const email=document.getElementById("login-email").value;
+    const pw=document.getElementById("login-pw").value;
+    const error=document.getElementById("login-error");
 
-input.addEventListener("keydown",function(e){
-    if(e.key==="Enter"){
-        let cmd = input.value.trim();
-        output.innerHTML += "\nC:\\system> " + cmd + "\n";
-        
-        if(cmd === "status"){
-            output.innerHTML += "All services operational.\n";
-        }else{
-            output.innerHTML += "Unknown command.\n";
-        }
-        input.value="";
+    let users=JSON.parse(localStorage.getItem("users")||"[]");
+
+    const user=users.find(u=>u.email===email && u.pw===pw);
+
+    if(!user){
+        error.innerText="이메일 또는 비밀번호가 올바르지 않습니다.";
+        error.classList.remove("hidden");
+        return;
     }
-});
+
+    alert(user.name+"님 환영합니다!");
+}
 </script>
 
 </body>
