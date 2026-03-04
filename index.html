@@ -9,48 +9,88 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{
     font-family:'Noto Sans KR',sans-serif;
-    background:linear-gradient(135deg,#1e1f29,#111);
+    background:radial-gradient(circle at top,#1f2235,#0e0f17 70%);
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
     color:#fff;
 }
+
+/* 전체 카드 글로우 */
 .page{
-    width:380px;
-    background:#1a1b25;
+    width:400px;
+    background:#141624;
     border-radius:20px;
     padding:40px;
-    box-shadow:0 20px 60px rgba(0,0,0,.5);
-    position:relative;
-    overflow:hidden;
+    box-shadow:
+        0 0 25px rgba(88,101,242,.3),
+        0 0 80px rgba(88,101,242,.15);
+    transition:.3s;
 }
-.panel-title{font-size:24px;font-weight:700;margin-bottom:8px}
-.panel-sub{font-size:14px;color:#aaa;margin-bottom:25px}
+.page:hover{
+    box-shadow:
+        0 0 35px rgba(88,101,242,.5),
+        0 0 120px rgba(88,101,242,.25);
+}
+
+.panel-title{
+    font-size:26px;
+    font-weight:700;
+    margin-bottom:8px;
+    text-shadow:0 0 10px rgba(88,101,242,.6);
+}
+.panel-sub{
+    font-size:14px;
+    color:#aaa;
+    margin-bottom:25px;
+}
+
 .input-wrap{
     position:relative;
-    margin-bottom:15px;
+    margin-bottom:18px;
 }
+
 .inp{
     width:100%;
-    padding:12px;
+    padding:14px;
     border:none;
-    border-radius:10px;
-    background:#2a2b38;
+    border-radius:12px;
+    background:#1e2033;
     color:#fff;
+    transition:.25s;
 }
-.inp:focus{outline:2px solid #5865f2}
+
+.inp:focus{
+    outline:none;
+    box-shadow:0 0 15px rgba(88,101,242,.7);
+}
+
+/* 비번 일치 글로우 */
+.match{
+    box-shadow:0 0 15px #00ff88 !important;
+}
+.no-match{
+    box-shadow:0 0 15px #ff3c3c !important;
+}
+
 .btn-primary{
     width:100%;
-    padding:12px;
+    padding:14px;
     border:none;
-    border-radius:10px;
+    border-radius:12px;
     background:#5865f2;
     color:#fff;
     cursor:pointer;
     margin-top:10px;
+    transition:.25s;
+    box-shadow:0 0 15px rgba(88,101,242,.5);
 }
-.btn-primary:hover{opacity:.9}
+.btn-primary:hover{
+    box-shadow:0 0 25px rgba(88,101,242,.8);
+    transform:translateY(-2px);
+}
+
 .switch-link{
     margin-top:15px;
     text-align:center;
@@ -59,22 +99,15 @@ body{
 .switch-link span{
     color:#5865f2;
     cursor:pointer;
+    text-shadow:0 0 8px rgba(88,101,242,.8);
 }
+
 .field-error{
     color:#ff5c5c;
     font-size:12px;
     margin-bottom:10px;
 }
-.pw-toggle{
-    position:absolute;
-    right:10px;
-    top:50%;
-    transform:translateY(-50%);
-    background:none;
-    border:none;
-    color:#aaa;
-    cursor:pointer;
-}
+
 .hidden{display:none}
 </style>
 </head>
@@ -94,7 +127,6 @@ body{
 
 <div class="input-wrap">
 <input id="login-pw" class="inp" type="password" placeholder="비밀번호">
-<button class="pw-toggle" onclick="togglePw('login-pw')">👁</button>
 </div>
 
 <div id="login-error" class="field-error hidden"></div>
@@ -120,12 +152,10 @@ body{
 
 <div class="input-wrap">
 <input id="reg-pw" class="inp" type="password" placeholder="비밀번호">
-<button class="pw-toggle" onclick="togglePw('reg-pw')">👁</button>
 </div>
 
 <div class="input-wrap">
 <input id="reg-pw2" class="inp" type="password" placeholder="비밀번호 확인">
-<button class="pw-toggle" onclick="togglePw('reg-pw2')">👁</button>
 </div>
 
 <div id="reg-error" class="field-error hidden"></div>
@@ -139,65 +169,54 @@ body{
 </div>
 
 <script>
+
 function goTo(type){
     document.getElementById("login-panel").classList.toggle("hidden", type!=="login");
     document.getElementById("register-panel").classList.toggle("hidden", type!=="register");
 }
 
-function togglePw(id){
-    const input=document.getElementById(id);
-    input.type=input.type==="password"?"text":"password";
-}
+/* 🔥 실시간 비번 일치 체크 */
+const pw1 = document.getElementById("reg-pw");
+const pw2 = document.getElementById("reg-pw2");
+
+pw2.addEventListener("input", ()=>{
+    if(pw2.value === "") {
+        pw2.classList.remove("match","no-match");
+        return;
+    }
+    if(pw1.value === pw2.value){
+        pw2.classList.add("match");
+        pw2.classList.remove("no-match");
+    }else{
+        pw2.classList.add("no-match");
+        pw2.classList.remove("match");
+    }
+});
 
 function register(){
-    const name=document.getElementById("reg-name").value;
-    const email=document.getElementById("reg-email").value;
-    const pw=document.getElementById("reg-pw").value;
-    const pw2=document.getElementById("reg-pw2").value;
-    const error=document.getElementById("reg-error");
+    const name=reg-name.value;
+    const email=reg-email.value;
+    const pw=reg-pw.value;
+    const pw2v=reg-pw2.value;
 
     if(!name||!email||!pw){
-        error.innerText="모든 항목을 입력하세요.";
-        error.classList.remove("hidden");
-        return;
-    }
-    if(pw!==pw2){
-        error.innerText="비밀번호가 일치하지 않습니다.";
-        error.classList.remove("hidden");
+        alert("모든 항목을 입력하세요.");
         return;
     }
 
-    let users=JSON.parse(localStorage.getItem("users")||"[]");
-
-    if(users.find(u=>u.email===email)){
-        error.innerText="이미 존재하는 이메일입니다.";
-        error.classList.remove("hidden");
+    if(pw!==pw2v){
+        alert("비밀번호가 일치하지 않습니다.");
         return;
     }
 
-    users.push({name,email,pw});
-    localStorage.setItem("users",JSON.stringify(users));
     alert("회원가입 완료!");
     goTo("login");
 }
 
 function login(){
-    const email=document.getElementById("login-email").value;
-    const pw=document.getElementById("login-pw").value;
-    const error=document.getElementById("login-error");
-
-    let users=JSON.parse(localStorage.getItem("users")||"[]");
-
-    const user=users.find(u=>u.email===email && u.pw===pw);
-
-    if(!user){
-        error.innerText="이메일 또는 비밀번호가 올바르지 않습니다.";
-        error.classList.remove("hidden");
-        return;
-    }
-
-    alert(user.name+"님 환영합니다!");
+    alert("로그인 기능은 데모입니다.");
 }
+
 </script>
 
 </body>
